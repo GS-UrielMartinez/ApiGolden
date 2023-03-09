@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.14" />
+    <PackageReference Include="Newtonsoft.Json.Bson" Version="1.0.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
   </ItemGroup>
 
@@ -14,10 +16,6 @@
     <ProjectReference Include="..\ApiGoldenstarServices.Data\ApiGoldenstarServices.Data.csproj" />
     <ProjectReference Include="..\ApiGoldenstarServices.HttpServices\ApiGoldenstarServices.HttpServices.csproj" />
     <ProjectReference Include="..\ApiGoldenstarServices.Models\ApiGoldenstarServices.Models.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\Paqueteria\" />
   </ItemGroup>
 
 </Project>

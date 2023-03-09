@@ -11,17 +11,19 @@ namespace ApiGoldenstarServices.Data.DataAccess
     {
         Task<IEnumerable<Customer>> GetCustomersList();
 
-        Task<Customer> GetCustomerById(int id);
+        Task<CustomerResponse> GetCustomerById(string idCustomer);
 
-        Task<Customer> AddCustomer(Customer customer);
+        Task<bool> AddCustomer(Customer customer);
 
-        Task<Customer> UpdateCustomer(Customer customer);
+        Task<bool> UpdateCustomer(Customer customer);
 
-        Task ValidateDuplicatedCustomer(Customer customer);
+        Task ValidateBillingCustomer(Customer customer);
 
         Task<ShippingAddress> AddShippingAddressToCustomer(ShippingAddress shippingAddress);
         
         Task<BillingAddress> AddBillingAddressToCustomer(BillingAddress billingAddress);
 
     }
+
+
 }
