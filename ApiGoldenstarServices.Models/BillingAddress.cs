@@ -10,38 +10,38 @@ namespace ApiGoldenstarServices.Models
     {
         public string IdBillingAddress { get; set; }
 
-        public string NombreCliente { get; set; }
+        public string Name { get; set; }
 
-        public string apellidoPaterno { get; set; }
+        public string FirstName { get; set; }
 
-        public string apellidoMaterno { get; set; }
+        public string LastName { get; set; }
 
-        public string cli_nombre { get; set; }
+        public string FullName { get; set; } // de aqui se puede jalar denominacion social
 
-        public string rfc { get; set; }
+        public string Rfc { get; set; }
 
-        public string denominacionSocial { get; set; }
+        public string CompanyName { get; set; } //denominacionSocial
 
-        public string regimenFiscal { get; set; }
+        public string TaxRegime { get; set; } //regimenFiscal
 
-        public string cve_forma_pago { get; set; }
+        public string PaymentTypeKey { get; set; } //cve_forma_pago
 
-        public string cve_metodo_pago { get; set; }
+        public string PaymentMethodKey { get; set; } //cve_metodo_pago
 
-        public string dias_credito { get; set; }
+        public string CreditDays { get; set; } //dias_credito
 
-        public string cve_uso_cfdi { get; set; }
+        public string CfdiUsageKey { get; set; } //cve_uso_cfdi
 
-        public string codigo_postal { get; set; }
+        public string ZipCode { get; set; }
 
-        public string ciudad { get; set; }
+        public string City { get; set; }
 
-        public string cve_ciudad { get; set; }
+        public string CityKey { get; set; }
 
-        public string estado { get; set; }
+        public string State { get; set; }
 
-        public string calle { get; set; }
+        public string Street { get; set; }
 
-        public string colonia { get; set; }
+        public string Colony { get; set; }
     }
 }

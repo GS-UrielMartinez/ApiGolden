@@ -10,37 +10,37 @@ namespace ApiGoldenstarServices.Models
 {
     public class Customer
     {
-        public string idCliente { get; set; }
+        public string IdCustomer { get; set; }//SP=cve_cliente -- db= cli_claveExterna
 
-        public string cli_cvematriz { get; set; } = null;// viene vacio
+        public string? ParentCustomerKey { get; set; } // viene vacio //matriz cve
 
-        public string cve_cliente { get; set; }
+        public string CustomerKey { get; set; } //SP=cve_cliente -- bd =cli_clave
 
-        public string nombreCompra { get; set; }
+        public string ShoppingName { get; set; }//nombreCompra
 
-        public string apellidoCompra { get; set; }
+        public string ShoppingFirstName { get; set; } //apellidoCompra
 
-        public string cli_email { get; set; }
+        public string Email { get; set; } //cli_email
 
-        public int CodigoEstado { get; set; }
+        public int StateCode { get; set; } //CodigoEstado
 
-        public string giro_cve { get; set; }
+        public string KeyTurn { get; set; } //giro_cve
 
-        public string cli_medio { get; set; }
+        public string MeansOfContact { get; set; } //cli_medio
 
-        public string claveAgente { get; set; } = null;// response golden
+        public string? AgentKey { get; set; } // response golden
 
-        public string credito { get; set; }
+        public string Credit { get; set; } //credito
 
-        public string credito_dias { get; set; }
+        public string CreditDays { get; set; } //credito_dias
 
         public bool CreditAvilable { get; set; }
 
-        public string Cli_ComprasCel { get; set; }
+        public string ShoppingPhoneNumber { get; set; } //Cli_ComprasCel
 
-        public List<BillingAddress> billing_address { get; set; }
+        public BillingAddress BillingAddress { get; set; }
 
-        public List<ShippingAddress> shipping_address { get; set; }
+        public ShippingAddress ShippingAddress { get; set; }
 
     }
 
@@ -49,11 +49,11 @@ namespace ApiGoldenstarServices.Models
     /// </summary>
     public class CustomerResponse
     {
-        public string cli_cvematriz { get; set; }
+        public string ParentCustomerKey { get; set; } //cli_cvematriz
 
-        public string cve_cliente { get; set; }
+        public string CustomerKey { get; set; } //cve_cliente
 
-        public string claveAgente { get; set; }
+        public string AgentKey { get; set; } //claveAgente
 
         public string Message { get; set; }
 
