@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Models.Roltec
+namespace ApiGoldenstarServices.Models.RoltecApi
 {
     public class CustomerRoltec
     {

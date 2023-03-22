@@ -1,12 +1,7 @@
 ﻿using ApiGoldenstarServices.Models;
 using ApiGoldenstarServices.Models.Roltec;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CustomerRoltec = ApiGoldenstarServices.Models.Roltec.CustomerRoltec;
+using CustomerRoltec = ApiGoldenstarServices.Models.RoltecApi.CustomerRoltec;
 
 namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 {
@@ -35,6 +30,13 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 
             return newCustomer;
         }
+
+        
+
+        //public Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public async Task<string> GetTokenAsync(UserApi2 userApi)
         {

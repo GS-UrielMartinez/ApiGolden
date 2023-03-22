@@ -11,7 +11,7 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 {
     public interface IRoltecApi
     {
-        Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer);
+        //Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer);
         Task<string> GetTokenAsync(UserApi2 user);
     }
 }

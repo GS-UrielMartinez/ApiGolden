@@ -3,6 +3,7 @@
 
 using ApiGoldenstarServices.Data;
 using ApiGoldenstarServices.Data.DataAccess;
+using ApiGoldenstarServices.Data.DataAccess.Goldenstar;
 using ApiGoldenstarServices.HttpServices.ExternalServices.Roltec;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -19,8 +20,9 @@ var SqlConnectionConfiguration = new SqlConfiguration(builder.Configuration.GetC
 builder.Services.AddSingleton(SqlConnectionConfiguration);
 
 //Global Connections services to db
-builder.Services.AddScoped<ICustomer, DACustomer>();
 builder.Services.AddScoped<IUser, DAUser>();
+builder.Services.AddScoped<ICustomer, DACustomer>();
+builder.Services.AddScoped<IOrder, DAOrder>();
 
 //Global connections to API Services
 builder.Services.AddScoped<IRoltecApi, HttpRoltecServicesAPI>();

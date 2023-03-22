@@ -116,7 +116,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
             }
 
             //get new customer
-            var newCustomer = await _DACustomer.GetCustomerById(customer.idCliente);
+            var newCustomer = await _DACustomer.GetCustomerById(customer.IdCustomer);
 
             newCustomer.Message= _Message;
             
