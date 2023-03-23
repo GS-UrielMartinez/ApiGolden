@@ -35,7 +35,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
             await db.OpenAsync();
             // Add paremeters to StoreProcedure
             DynamicParameters parameters = new DynamicParameters();
-            parameters.Add("@cve_cliente", customer.IdCustomer.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_cliente", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);
             parameters.Add("@nombreCompra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);
@@ -75,7 +75,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
             try
             {
 
-                var cust= await db.ExecuteAsync("Magento_Cliente_Agregar", parameters, commandType: CommandType.StoredProcedure);
+                var cust= await db.ExecuteAsync("RoltecAddCustomer", parameters, commandType: CommandType.StoredProcedure);
                 //message
 
                 await db.CloseAsync();
@@ -155,9 +155,67 @@ namespace ApiGoldenstarServices.Data.DataAccess
             
         }
 
-        public Task<bool> UpdateCustomer(Customer customer)
+        public async Task<bool> UpdateCustomer(Customer customer)
         {
-            throw new NotImplementedException();
+            var db = DbConnection();
+            await db.OpenAsync();
+            // Add paremeters to StoreProcedure
+            DynamicParameters parameters = new DynamicParameters();
+            parameters.Add("@customerKey", customer.CustomerKey, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_cliente", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
+            //parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@nombreCompra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@apellidoCompra", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@giro_cve", customer.KeyTurn, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@credito_dias", int.Parse(customer.CreditDays), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_nombre", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@rfc", customer.BillingAddress.Rfc, (DbType?)SqlDbType.VarChar);
+            if (customer.BillingAddress.Rfc.Length == 13)
+            {
+                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
+            }
+            else
+            {
+                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.CompanyName, (DbType?)SqlDbType.VarChar);
+            }
+
+            parameters.Add("@CveRegimenFiscal", customer.BillingAddress.TaxRegime, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_metodo_pago", customer.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_forma_pago", customer.BillingAddress.PaymentTypeKey, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_uso_cfdi", customer.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@codigo_postal", customer.BillingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@ciudad", customer.BillingAddress.City, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.Int);
+            parameters.Add("@calle", customer.BillingAddress.Street.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@colonia", customer.BillingAddress.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@telefono", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@pais", "Mexico", (DbType?)SqlDbType.VarChar);
+
+            try
+            {
+
+                var cust = await db.ExecuteAsync("RoltecUpdateCustomer", parameters, commandType: CommandType.StoredProcedure);
+                //message
+
+                await db.CloseAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await db.CloseAsync();
+
+                throw new Exception(ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -194,7 +252,40 @@ namespace ApiGoldenstarServices.Data.DataAccess
         {
             throw new NotImplementedException();
         }
+        // validar si existe el cliente con el customerkey
+        public async Task<bool> GetCustomerByCustumerKey(string customerKey)
+        {
+            string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_clave = '{customerKey}'";
 
+            SqlConnection sqlConnection = DbConnection();
+  
+
+            var customerExist = await sqlConnection.QueryFirstOrDefaultAsync<CustomerResponse>(queryString);
+            
+           if (customerExist != null)
+            {
+                return true;
+            }
+            return false;
+            
+        }
+
+        public async Task<bool> GetBillingCustomerById(string IdBillingAddress)
+        {
+            string queryString = $@"select idBillingAddress as IdBillingAddress, from inctclie (nolock) where cli_clave = '{IdBillingAddress}'";
+
+            SqlConnection sqlConnection = DbConnection();
+
+
+            var customerExist = await sqlConnection.QueryFirstOrDefaultAsync<BillingAddress>(queryString);
+
+            if (customerExist != null)
+            {
+                return true;
+            }
+            return false;
+
+        }
         public Task<BillingAddress> AddBillingAddressToCustomer(BillingAddress billingAddress)
         {
             throw new NotImplementedException();

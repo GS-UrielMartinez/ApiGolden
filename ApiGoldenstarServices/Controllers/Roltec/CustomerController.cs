@@ -125,7 +125,50 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         }
 
         //update
+        [HttpPut]
+        [Route("Update/{CustomerKey}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer, string CustomerKey)
+        {
+            var newCustomerResponse = new
+            {
+                Message = "Datos incompletos"
 
+            };
+            var _Message = "";
+            if (customer == null) return BadRequest(newCustomerResponse);
+
+            //To Do :validate if Customer Exist
+            var customerExist =await _DACustomer.GetCustomerByCustumerKey(CustomerKey);
+            if (customerExist == false)
+            {
+                var customerResponse = new
+                {
+                    Message = $@"El cliente con clave {CustomerKey} no existe"
+                };
+                return BadRequest(customerResponse);
+            }
+            try
+            {
+                await _DACustomer.UpdateCustomer(customer);
+
+                _Message = "Cliente actualizado correctamente correctamente";
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
+            }
+
+            //get new customer
+            var newCustomer = await _DACustomer.GetCustomerById(customer.IdCustomer);
+
+            newCustomer.Message = _Message;
+
+            return StatusCode(201, newCustomer);
+
+        }
 
 
         /// <summary>
@@ -214,7 +257,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
 
             try
             {
-
+                // usa la misma funcion de agregar cliente
                 await _DACustomer.AddCustomer(billingCustomer);
 
                 _message = "SE creo una nueva direccion de facturacion";
@@ -224,6 +267,49 @@ namespace ApiGoldenstarServices.Controllers.Roltec
             catch (Exception ex)
             {
                 
+                return BadRequest(ex.Message);
+            }
+
+        }
+
+
+
+        [HttpPost]
+        [Route("BillingAddress/Update/{IdBillingAddress}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateBillingAddress([FromBody] Customer billingCustomer, string IdBillingAddress)
+        {
+            var response = new
+            {
+                message = "Datos incompletos o peticion vacia"
+            };
+
+            var _message = "";
+            if (billingCustomer == null) return BadRequest(response);
+
+            try
+            {
+                await _DACustomer.GetBillingCustomerById(IdBillingAddress);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
+            try
+            {
+                // usa la misma funcion de actualizar cliente
+                await _DACustomer.UpdateCustomer(billingCustomer);
+
+                _message = @$"SE Actualizo la direccion de facturacion con id {IdBillingAddress}";
+
+                return StatusCode(200, _message);
+            }
+            catch (Exception ex)
+            {
+
                 return BadRequest(ex.Message);
             }
 
