@@ -84,6 +84,16 @@ var app = builder.Build();
 //if (app.Environment.IsDevelopment())
 //{
 //}
+
+//CORS configuration
+app.UseCors(options =>
+{
+    options.WithOrigins(builder.Configuration.GetValue<string>("RoltecAPI"));
+    options.AllowAnyMethod();
+    options.AllowAnyHeader();
+});
+
+
 //swagger config
 app.UseSwagger();
 app.UseSwaggerUI(c =>
