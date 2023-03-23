@@ -274,7 +274,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
 
 
 
-        [HttpPost]
+        [HttpPut]
         [Route("BillingAddress/Update/{IdBillingAddress}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
