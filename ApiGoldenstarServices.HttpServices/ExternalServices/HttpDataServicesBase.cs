@@ -67,8 +67,8 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices
             //{
             //    throw new HttpResponseMessage().StatusCode();
             //}
-            client.DefaultRequestHeaders.Accept.Add(
-                new MediaTypeWithQualityHeaderValue("application/json"));
+            //client.DefaultRequestHeaders.Accept.Add(
+            //    new MediaTypeWithQualityHeaderValue("application/json"));
             HttpResponseMessage response = default;
             var jsonObject = JsonConvert.SerializeObject(item);
             var content = new StringContent(jsonObject.ToString(), Encoding.UTF8, "application/json");

@@ -31,7 +31,27 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
             return newCustomer;
         }
 
-        
+        public async Task AddCustomerToWeb()
+        {
+            var user = new UserApi2
+            {
+                Username = "kminchelle",
+                Password = "0lelplR"
+            };
+            var token = await GetTokenAsync(user);
+
+
+            try
+            {
+                //var newCustomer = await _dataServices.PostAsJsonAsync<UserApi2>("api/users/data", user, token);
+
+            }catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
 
         //public Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer)
         //{
