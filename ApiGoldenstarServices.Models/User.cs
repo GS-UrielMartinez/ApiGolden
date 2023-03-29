@@ -18,7 +18,7 @@ namespace ApiGoldenstarServices.Models
 
     }
 
-    //api gs
+    //Estructura para el inicio de sesion par ala api principal
     public class UserApi
     {
         public string Email { get; set; }
@@ -26,11 +26,12 @@ namespace ApiGoldenstarServices.Models
         public string Password { get; set; }
     }
 
-    public class UserApi2
+    // Estructura para la api de roltec
+    public class UserApiRoltec
     {
-        public string Username { get; set; }
+        public string email { get; set; }
 
-        public string Password { get; set; }
+        public string password { get; set; }
     }
 
     public class TokenResponse

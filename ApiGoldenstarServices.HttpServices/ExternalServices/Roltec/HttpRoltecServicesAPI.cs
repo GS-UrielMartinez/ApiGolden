@@ -11,39 +11,27 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 
         public HttpRoltecServicesAPI()
         {
-            _dataServices = new HttpDataServicesBase("https://dummyjson.com/");
+            _dataServices = new HttpDataServicesBase("http://137.184.87.110:80/");
             
         }
 
 
-        public async Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer)
+        public async Task AddCustomerToWeb(CustomerRoltec customerRoltec)
         {
-            var user = new UserApi2
+            //to do: obtener los valores desde al app settings
+            var userRoltec = new UserApiRoltec
             {
-                Username = "kminchelle",
-                Password = "0lelplR"
+                email = "admin1@roltec.mx",
+                password = "M2Gt_ky7NL+?p"
             };
-            var token = await GetTokenAsync(user);
             
-            var newCustomer= await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customer,token);
 
-
-            return newCustomer;
-        }
-
-        public async Task AddCustomerToWeb()
-        {
-            var user = new UserApi2
-            {
-                Username = "kminchelle",
-                Password = "0lelplR"
-            };
-            var token = await GetTokenAsync(user);
+            var token = await GetTokenAsync(userRoltec);
 
 
             try
             {
-                //var newCustomer = await _dataServices.PostAsJsonAsync<UserApi2>("api/users/data", user, token);
+                var newCustomer = await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customerRoltec, token);
 
             }catch (Exception ex)
             {
@@ -53,17 +41,13 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 
 
 
-        //public Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customer)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public async Task<string> GetTokenAsync(UserApi2 userApi)
+       
+        public async Task<string> GetTokenAsync(UserApiRoltec userApiRoltec)
         {
             try
             {
 
-                var token = await _dataServices.PostAsJsonAsyncItem("auth/login", userApi);
+                var token = await _dataServices.PostAsJsonAsyncItem("api/sessions/data", userApiRoltec);
                 var contentResponse = await token.Content.ReadAsStringAsync();
                 UserRoltecResponse newToken = await Task.Run(() => JsonConvert.DeserializeObject<UserRoltecResponse>(contentResponse));
 

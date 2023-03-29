@@ -9,20 +9,27 @@ namespace ApiGoldenstarServices.Models.RoltecApi
 {
     public class CustomerRoltec
     {
-        public int Id { get; set; }
+        public int id { get; set; }
 
-        public string Name { get; set; }
+        public string name { get; set; }
 
         public string last_name_1 { get; set; }
 
         public string last_name_2 { get; set; }
 
-        public string Phone { get; set; }
+        public string phone { get; set; }
         
-        public string Email { get; set; }
+        public string email { get; set; }
 
-        public string rfc { get; set; } 
+        public string rfc { get; set; }
+
+        public string giro_cve { get; set; }
+        
+        public string cli_medio_contacto { get; set; }
+        
+        public string state_id { get; set; }
     }
 
+   
     
 }

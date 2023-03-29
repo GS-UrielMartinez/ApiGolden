@@ -47,10 +47,7 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices
 
         public async Task<T> PostAsJsonAsync<T>(string uri, T item,string token)
         {
-            //if (item == null)
-            //{
-            //    return false;
-            //}
+           
             AddAuthorizationHeader(token);
             var serializedItem = JsonConvert.SerializeObject(item);
 
@@ -61,14 +58,10 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices
             return newObject;
         }
 
-        public async Task<HttpResponseMessage> PostAsJsonAsyncItem(string uri,UserApi2 item)
+        //to do: refactorizar esta funcion para que sea generica, por ahora se usa para obtener el token de la api de roltec
+        public async Task<HttpResponseMessage> PostAsJsonAsyncItem(string uri,UserApiRoltec item)
         {
-            //if (item == null)
-            //{
-            //    throw new HttpResponseMessage().StatusCode();
-            //}
-            //client.DefaultRequestHeaders.Accept.Add(
-            //    new MediaTypeWithQualityHeaderValue("application/json"));
+            
             HttpResponseMessage response = default;
             var jsonObject = JsonConvert.SerializeObject(item);
             var content = new StringContent(jsonObject.ToString(), Encoding.UTF8, "application/json");
@@ -84,12 +77,12 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices
             {
                 throw new Exception(ex.Message);
             }
-            //var json = await client.GetStringAsync(uri);
-            //UserRoltecResponse result = await Task.Run(() => JsonConvert.DeserializeObject<UserRoltecResponse>(response));
 
             return response;
         }
 
+        //Agrega el token al header de la peticion
+        // to do: guardar el token en memoria para no hacer muchas peticiones
         private void AddAuthorizationHeader(string token)
         {
             if (string.IsNullOrEmpty(token))

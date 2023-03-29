@@ -5,13 +5,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using ApiGoldenstarServices.Models.RoltecApi;
 
 namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 {
     public interface IRoltecApi
     {
-        Task AddCustomerToWeb();
-        Task<string> GetTokenAsync(UserApi2 user);
+        Task AddCustomerToWeb(CustomerRoltec customerRoltec);
+        Task<string> GetTokenAsync(UserApiRoltec userRoltec);
     }
 }
