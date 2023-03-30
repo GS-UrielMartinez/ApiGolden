@@ -31,7 +31,7 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 
             try
             {
-                var newCustomer = await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customerRoltec, token);
+                //var newCustomer = await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customerRoltec, token);
 
             }catch (Exception ex)
             {
@@ -41,17 +41,16 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 
 
 
-       
+       //get token from roltec.mx
         public async Task<string> GetTokenAsync(UserApiRoltec userApiRoltec)
         {
             try
             {
-
                 var token = await _dataServices.PostAsJsonAsyncItem("api/sessions/data", userApiRoltec);
                 var contentResponse = await token.Content.ReadAsStringAsync();
                 UserRoltecResponse newToken = await Task.Run(() => JsonConvert.DeserializeObject<UserRoltecResponse>(contentResponse));
 
-                return newToken.AccesToken;
+                return newToken.accessToken;
             }
             catch
             {

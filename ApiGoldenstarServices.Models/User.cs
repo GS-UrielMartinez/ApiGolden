@@ -26,13 +26,7 @@ namespace ApiGoldenstarServices.Models
         public string Password { get; set; }
     }
 
-    // Estructura para la api de roltec
-    public class UserApiRoltec
-    {
-        public string email { get; set; }
-
-        public string password { get; set; }
-    }
+    
 
     public class TokenResponse
     {
