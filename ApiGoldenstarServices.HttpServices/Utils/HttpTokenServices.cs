@@ -47,9 +47,9 @@ namespace ApiGoldenstarServices.HttpServices.Utils
 
                 return newToken.accessToken;
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                return ex.Message;
             }
         }
 

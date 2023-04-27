@@ -25,7 +25,7 @@ namespace ApiGoldenstarServices.Controllers.Admin.Roltec
         }
 
         [HttpPost]
-        [Route("UpdatoToWeb/{IdCustomer}")]
+        [Route("UpdatetoToWeb/{IdCustomer}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddCustomer(string IdCustomer)
