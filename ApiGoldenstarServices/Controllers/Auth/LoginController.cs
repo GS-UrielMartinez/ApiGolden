@@ -7,9 +7,9 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 using System.Text;
-using ApiGoldenstarServices.Data.DataAccess;
-using ApiGoldenstarServices.Models;
 using Newtonsoft.Json;
+using ApiGoldenstarServices.Models.Goldenstar;
+using ApiGoldenstarServices.Data.DataAccess.Auth;
 
 namespace ApiGoldenstarServices.Controllers.Auth
 {

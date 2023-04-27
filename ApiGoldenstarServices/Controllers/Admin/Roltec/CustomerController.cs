@@ -1,4 +1,4 @@
-﻿using ApiGoldenstarServices.Data.DataAccess;
+﻿using ApiGoldenstarServices.Data.DataAccess.Roltec;
 using ApiGoldenstarServices.HttpServices.ExternalServices.Roltec;
 using ApiGoldenstarServices.Models.RoltecApi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,20 +16,40 @@ namespace ApiGoldenstarServices.Controllers.Admin.Roltec
     public class CustomerController : Controller
     {
         private readonly IRoltecApi _roltecApi;
+        private readonly ICustomer _DACustomer;
 
-        public CustomerController(IRoltecApi roltecApi)
+        public CustomerController(IRoltecApi roltecApi, ICustomer dACustomer)
         {
             _roltecApi = roltecApi;
+            _DACustomer = dACustomer;
         }
 
         [HttpPost]
-        [Route("Create")]
+        [Route("UpdatoToWeb/{IdCustomer}")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> AddCustomer([FromBody] CustomerRoltec customerRoltec)
+        public async Task<IActionResult> AddCustomer(string IdCustomer)
         {
-            // agregar validaciones
-            await _roltecApi.AddCustomerToWeb(customerRoltec);
+            // get customer from DB
+            var customer = await _DACustomer.GetCustomerById(IdCustomer);
+            
+            //redifinir la clase completa depues de arreglar la query
+            if (customer == null) return NotFound();
+
+            var customerRoltec = new CustomerRoltec();
+            customerRoltec.id = customer.IdCustomer;
+            customerRoltec.name = customer.ShoppingName;
+
+            try
+            {   
+                //Request to WEB
+               CustomerRoltec newcustomer = await _roltecApi.AddCustomerToWeb(customerRoltec);
+
+                return StatusCode(200, newcustomer);
+
+            }catch (Exception  ex){
+
+            }
             return Ok();
         }
     }

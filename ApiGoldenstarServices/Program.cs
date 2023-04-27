@@ -2,9 +2,11 @@
 
 
 using ApiGoldenstarServices.Data;
-using ApiGoldenstarServices.Data.DataAccess;
+using ApiGoldenstarServices.Data.DataAccess.Auth;
 using ApiGoldenstarServices.Data.DataAccess.Goldenstar;
+using ApiGoldenstarServices.Data.DataAccess.Roltec;
 using ApiGoldenstarServices.HttpServices.ExternalServices.Roltec;
+using ApiGoldenstarServices.HttpServices.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -26,6 +28,7 @@ builder.Services.AddScoped<IOrder, DAOrder>();
 
 //Global connections to API Services
 builder.Services.AddScoped<IRoltecApi, HttpRoltecServicesAPI>();
+builder.Services.AddScoped<ITokenServices, HttpTokenServices>();
 
 // Culture info settings
 var cultureInfo = new System.Globalization.CultureInfo("es-MX");

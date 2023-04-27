@@ -1,6 +1,6 @@
 ﻿using ApiGoldenstarServices.Controllers.Auth;
-using ApiGoldenstarServices.Data.DataAccess;
-using ApiGoldenstarServices.Models;
+using ApiGoldenstarServices.Data.DataAccess.Roltec;
+using ApiGoldenstarServices.Models.Goldenstar;
 using Azure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -119,7 +119,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
             }
 
             //get new customer
-            var newCustomer = await _DACustomer.GetCustomerById(customer.IdCustomer);
+            var newCustomer = await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
 
             newCustomer.Message= _Message;
             
@@ -165,7 +165,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
             }
 
             //get new customer
-            var newCustomer = await _DACustomer.GetCustomerById(customer.IdCustomer);
+            var newCustomer = await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
 
             newCustomer.Message = _Message;
 
