@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Models
+namespace ApiGoldenstarServices.Models.Goldenstar
 {
     public class Customer
     {

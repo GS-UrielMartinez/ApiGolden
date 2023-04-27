@@ -21,10 +21,13 @@ var builder = WebApplication.CreateBuilder(args);
 var SqlConnectionConfiguration = new SqlConfiguration(builder.Configuration.GetConnectionString("SQLServerConnection"));
 builder.Services.AddSingleton(SqlConnectionConfiguration);
 
+//builder.Services.AddScoped(IConfiguration, ConfigurationManager);
+
 //Global Connections services to db
 builder.Services.AddScoped<IUser, DAUser>();
 builder.Services.AddScoped<ICustomer, DACustomer>();
 builder.Services.AddScoped<IOrder, DAOrder>();
+
 
 //Global connections to API Services
 builder.Services.AddScoped<IRoltecApi, HttpRoltecServicesAPI>();

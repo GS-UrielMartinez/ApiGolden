@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Models
+namespace ApiGoldenstarServices.Models.Goldenstar
 {
     public class User
     {
         public string Name { get; set; }
-        
+
         public string Email { get; set; }
 
         public string Password { get; set; }
@@ -26,7 +26,7 @@ namespace ApiGoldenstarServices.Models
         public string Password { get; set; }
     }
 
-    
+
 
     public class TokenResponse
     {

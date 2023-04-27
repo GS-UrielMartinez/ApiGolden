@@ -11,9 +11,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.HttpServices.ExternalServices
+namespace ApiGoldenstarServices.HttpServices.Utils
 {
-    public class HttpDataServicesBase 
+    public class HttpDataServicesBase
     {
         private HttpClient client;
 
@@ -35,33 +35,46 @@ namespace ApiGoldenstarServices.HttpServices.ExternalServices
 
             // The responseCache is a simple store of past responses to avoid unnecessary requests for the same resource.
             // Feel free to remove it or extend this request logic as appropraite for your app.
-                AddAuthorizationHeader(accessToken);
+            AddAuthorizationHeader(accessToken);
 
-                var json = await client.GetStringAsync(uri);
+            var json = await client.GetStringAsync(uri);
 
-                result = await Task.Run(() => JsonConvert.DeserializeObject<T>(json));
-            
+            result = await Task.Run(() => JsonConvert.DeserializeObject<T>(json));
+
             return result;
         }
 
 
-        public async Task<T> PostAsJsonAsync<T>(string uri, T item,string token)
+        public async Task<T> PostAsJsonAsync<T>(string uri, T item, string token)
         {
-           
+
             AddAuthorizationHeader(token);
             var serializedItem = JsonConvert.SerializeObject(item);
 
             var response = await client.PostAsync(uri, new StringContent(serializedItem, Encoding.UTF8, "application/json"));
             var contentResponse = await response.Content.ReadAsStringAsync();
+
+            T newObject = await Task.Run(() => JsonConvert.DeserializeObject<T>(contentResponse));
+
+            return newObject;
+        }
+
+        public async Task<T> PutAsJsonAsync<T>(string uri, T item,string token)
+        {
+            AddAuthorizationHeader(token);
+            var serializedItem = JsonConvert.SerializeObject(item);
+            var response = await client.PutAsync(uri, new StringContent(serializedItem, Encoding.UTF8, "application/json"));
+            var contentResponse = await response.Content.ReadAsStringAsync();
+
             T newObject = await Task.Run(() => JsonConvert.DeserializeObject<T>(contentResponse));
 
             return newObject;
         }
 
         //to do: refactorizar esta funcion para que sea generica, por ahora se usa para obtener el token de la api de roltec
-        public async Task<HttpResponseMessage> PostAsJsonAsyncItem(string uri,UserApiRoltec item)
+        public async Task<HttpResponseMessage> PostAsJsonAsyncItem(string uri, UserApiRoltec item)
         {
-            
+
             HttpResponseMessage response = default;
             var jsonObject = JsonConvert.SerializeObject(item);
             var content = new StringContent(jsonObject.ToString(), Encoding.UTF8, "application/json");

@@ -1,5 +1,5 @@
 ﻿using ApiGoldenstarServices.Data.Exceptions;
-using ApiGoldenstarServices.Models;
+using ApiGoldenstarServices.Models.Goldenstar;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Protocols;
@@ -10,12 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Data.DataAccess
+namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 {
     public class DACustomer : ICustomer
     {
         private SqlConfiguration _conectionString;
-        
+
 
         public DACustomer(SqlConfiguration connectionString)
         {
@@ -30,7 +30,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
 
         public async Task<bool> AddCustomer(Customer customer)
         {
-           
+
             var db = DbConnection();
             await db.OpenAsync();
             // Add paremeters to StoreProcedure
@@ -75,11 +75,11 @@ namespace ApiGoldenstarServices.Data.DataAccess
             try
             {
 
-                var cust= await db.ExecuteAsync("RoltecAddCustomer", parameters, commandType: CommandType.StoredProcedure);
+                var cust = await db.ExecuteAsync("RoltecAddCustomer", parameters, commandType: CommandType.StoredProcedure);
                 //message
 
                 await db.CloseAsync();
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
 
                 throw new Exception(ex.Message);
             }
-  
+
         }
 
 
@@ -104,10 +104,10 @@ namespace ApiGoldenstarServices.Data.DataAccess
         ///     }
         /// </returns>
         /// <exception cref="Exception"></exception>
-        public async Task<CustomerResponse> GetCustomerById(string idCustomer)
+        public async Task<CustomerResponse> GetCustomerResponseById(string idCustomer)
         {
 
-            string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_claveExterna = '{idCustomer }'";
+            string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_claveExterna = '{idCustomer}'";
 
             SqlConnection sqlConnection = DbConnection();
             sqlConnection.Open();
@@ -118,7 +118,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
 
                 customerResponse = await sqlConnection.QueryFirstOrDefaultAsync<CustomerResponse>(queryString);
 
-               
+
                 return customerResponse;
             }
             catch (Exception ex)
@@ -136,7 +136,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
             var db = DbConnection();
             await db.OpenAsync();
             // se utiliza el as para poder mapear el resultado a la definicion de la clase
-             var strQuery = @"select top 20
+            var strQuery = @"select top 20
                 cli_clave as CustomerKey
                 ,cli_email as Email
                 ,cli_rfc as Rfc
@@ -144,17 +144,23 @@ namespace ApiGoldenstarServices.Data.DataAccess
                 from inctclie 
 			    where cli_claveExterna <> ''";
             // agregar mas campos
-            // seria mejor poner la definicion de Billing address, es lo mismo que el cliente
-            var CustomerList = await db.QueryAsync<Customer>(strQuery, new {});
+            // 
+            var CustomerList = await db.QueryAsync<Customer>(strQuery, new { });
 
             await db.CloseAsync();
 
-           
+
 
             return CustomerList;
-            
+
         }
 
+        /// <summary>
+        /// Actualizar los datos de un cliente
+        /// </summary>
+        /// <param name="customer"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<bool> UpdateCustomer(Customer customer)
         {
             var db = DbConnection();
@@ -228,17 +234,17 @@ namespace ApiGoldenstarServices.Data.DataAccess
         {
 
             var dbconnection = DbConnection();
-            
+
             string consulta = @$"SELECT top 1 CLI_RFC as Rfc FROM INCTCLIE (nolock) WHERE rtrim(ltrim(CLI_RFC))='{customer.BillingAddress.Rfc.Trim()}'";
             try
             {
                 var CustomerExist = await dbconnection.QueryFirstOrDefaultAsync<BillingAddress>(consulta);
-               if(CustomerExist != null)
+                if (CustomerExist != null)
                 {
                     if (CustomerExist.Rfc.Trim() != "XAXX010101000")
                     {
                         throw new CustomerCustomException("El RFC del cliente ya esta registrado");
-                    }  
+                    }
                 }
             }
             catch (Exception ex)
@@ -248,26 +254,112 @@ namespace ApiGoldenstarServices.Data.DataAccess
             }
         }
 
-        public Task<ShippingAddress> AddShippingAddressToCustomer(ShippingAddress shippingAddress)
+        /// <summary>
+        /// Agregar o actualizar una direccion de envio del cliente
+        /// </summary>
+        /// <param name="shippingAddress"></param>
+        /// <param name="customerId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<bool> AddShippingAddressToCustomer(ShippingAddress shippingAddress, string customerId)
         {
-            throw new NotImplementedException();
+            var db = DbConnection();
+            await db.OpenAsync();
+            // Add paremeters to StoreProcedure
+            DynamicParameters parameters = new DynamicParameters();
+
+            parameters.Add("@cve_cliente", customerId, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_sucursal", shippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar);//id que genera la pagina
+            parameters.Add("@sucursal", shippingAddress.Alias, (DbType?)SqlDbType.VarChar);//nombre de la sucursal
+            parameters.Add("@calle", shippingAddress.Street, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@colonia", shippingAddress.Colony, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@ciudad", shippingAddress.City, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@telefono", shippingAddress.Phone, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@codigo_postal", shippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cve_ciudad", shippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
+            try
+            {
+                // validar si existe para aplicar el update o el add
+                var shipppingAddresExist = await ShippingAddressExist(customerId, shippingAddress.ShippingAddressId.ToString());
+                if (shipppingAddresExist == true)
+                {
+                    await db.ExecuteAsync("RoltecUpdateShippingAddress", parameters, commandType: CommandType.StoredProcedure);
+                }
+                else
+                {
+
+                    await db.ExecuteAsync("RoltecAddShippingAddress", parameters, commandType: CommandType.StoredProcedure);
+                }
+                //message
+
+                await db.CloseAsync();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                await db.CloseAsync();
+
+                throw new Exception(ex.Message);
+            }
         }
-        // validar si existe el cliente con el customerkey
+
+        /// <summary>
+        /// Validar si la direccion de envio ya existe
+        /// </summary>
+        /// <param name="idCustomer"></param>
+        /// <param name="shippingAddressId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        private async Task<bool> ShippingAddressExist(string idCustomer, string shippingAddressId)
+        {
+            string queryString = $@"select cliente as CustomerId,IDSuc as ShippingAddressId  from from SUCS_DOMICILIOS (nolock) where cliente='{idCustomer}' and IDSuc='{shippingAddressId}'";
+
+            SqlConnection sqlConnection = DbConnection();
+            sqlConnection.Open();
+
+            ShippingAddress? shippingAddress = default;
+            try
+            {
+
+                shippingAddress = await sqlConnection.QueryFirstOrDefaultAsync<ShippingAddress>(queryString);
+
+                if (shippingAddress == null) { return false; }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
+
+        }
+
+        /// <summary>
+        /// Validar si existe el cliente con el customerkey
+        /// </summary>
+        /// <param name="customerKey"></param>
+        /// <returns></returns>
         public async Task<bool> GetCustomerByCustumerKey(string customerKey)
         {
             string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_clave = '{customerKey}'";
 
             SqlConnection sqlConnection = DbConnection();
-  
+
 
             var customerExist = await sqlConnection.QueryFirstOrDefaultAsync<CustomerResponse>(queryString);
-            
-           if (customerExist != null)
+
+            if (customerExist != null)
             {
                 return true;
             }
             return false;
-            
+
         }
 
         public async Task<bool> GetBillingCustomerById(string IdBillingAddress)
@@ -286,9 +378,42 @@ namespace ApiGoldenstarServices.Data.DataAccess
             return false;
 
         }
+
         public Task<BillingAddress> AddBillingAddressToCustomer(BillingAddress billingAddress)
         {
             throw new NotImplementedException();
+        }
+
+        public async Task<Customer> GetCustomerById(string idCustomer)
+        {
+            //ToDo: agregar todas las propiedades del cliente
+            string queryString = $@"select 
+                                    cli_clave as CustomerKey,
+                                    cli_cvematriz as ParentCustomerKey,
+                                    cli_agente as AgentKey 
+                                    from inctclie (nolock) 
+                                    where cli_claveExterna = '{idCustomer}'";
+
+            SqlConnection sqlConnection = DbConnection();
+            sqlConnection.Open();
+
+            Customer? customer = default;
+            try
+            {
+
+                customer = await sqlConnection.QueryFirstOrDefaultAsync<Customer>(queryString);
+
+
+                return customer;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                sqlConnection.Close();
+            }
         }
     }
 }

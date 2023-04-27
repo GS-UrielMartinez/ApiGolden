@@ -1,4 +1,4 @@
-﻿using ApiGoldenstarServices.Models;
+﻿using ApiGoldenstarServices.Models.Goldenstar;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Data.DataAccess
+namespace ApiGoldenstarServices.Data.DataAccess.Auth
 {
     public class DAUser : IUser
     {
@@ -34,7 +34,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
                          WHERE ""Email"" = @email";
             try
             {
-                var user = await db.QueryFirstOrDefaultAsync<User>(sql, new { email = email });
+                var user = await db.QueryFirstOrDefaultAsync<User>(sql, new { email });
 
                 return user;
             }
@@ -43,7 +43,7 @@ namespace ApiGoldenstarServices.Data.DataAccess
                 throw new Exception(ex.Message);
             }
 
-           
+
         }
     }
 }

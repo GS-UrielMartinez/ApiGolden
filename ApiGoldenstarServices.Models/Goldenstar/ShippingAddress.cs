@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ApiGoldenstarServices.Models
+namespace ApiGoldenstarServices.Models.Goldenstar
 {
     public class ShippingAddress
     {
@@ -12,8 +12,8 @@ namespace ApiGoldenstarServices.Models
         //paqueterias
 
         public string? ShippingAddressId { get; set; } // cve_sucursal
-        
-        public string? CustomerId  { get; set; }//cve_cliente
+
+        public string? CustomerId { get; set; }//cve_cliente
 
         public string? Alias { get; set; }//sucursal
 

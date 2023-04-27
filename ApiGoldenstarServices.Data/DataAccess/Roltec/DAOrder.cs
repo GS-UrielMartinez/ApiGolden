@@ -1,5 +1,4 @@
-﻿using ApiGoldenstarServices.Models;
-using ApiGoldenstarServices.Models.Goldenstar;
+﻿using ApiGoldenstarServices.Models.Goldenstar;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System;

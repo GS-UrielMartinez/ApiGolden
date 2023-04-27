@@ -1,62 +1,120 @@
-﻿using ApiGoldenstarServices.Models;
+﻿using ApiGoldenstarServices.HttpServices.Utils;
+using ApiGoldenstarServices.Models;
+using ApiGoldenstarServices.Models.Goldenstar;
 using ApiGoldenstarServices.Models.Roltec;
+using ApiGoldenstarServices.Models.RoltecApi;
+using ApiGoldenstarServices.Models.ServicesModels.RoltecApi;
 using Newtonsoft.Json;
 using CustomerRoltec = ApiGoldenstarServices.Models.RoltecApi.CustomerRoltec;
 
 namespace ApiGoldenstarServices.HttpServices.ExternalServices.Roltec
 {
+    /// <summary>
+    /// Se realizan todas las peticiones hacia el servicio de Roltec.mx
+    /// </summary>
     public class HttpRoltecServicesAPI : IRoltecApi
     {
         private HttpDataServicesBase _dataServices;
+        //get token
+        private readonly ITokenServices _tokenServices;
+        //Data access customer
 
-        public HttpRoltecServicesAPI()
+        public HttpRoltecServicesAPI(ITokenServices tokenServices)
         {
             _dataServices = new HttpDataServicesBase("http://137.184.87.110:80/");
-            
+            _tokenServices = tokenServices;
         }
 
 
-        public async Task AddCustomerToWeb(CustomerRoltec customerRoltec)
+
+        /// <summary>
+        /// Agregar Criente a la pagina roltec.mx , ya sea desde marka o salesforce
+        /// </summary>
+        /// <param name="customerRoltec"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<CustomerRoltec> AddCustomerToWeb(CustomerRoltec customerRoltec)
         {
-            //to do: obtener los valores desde al app settings
-            var userRoltec = new UserApiRoltec
-            {
-                email = "admin1@roltec.mx",
-                password = "M2Gt_ky7NL+?p"
-            };
-            
-
-            var token = await GetTokenAsync(userRoltec);
-
+            var token = await _tokenServices.GetTokenAsync();
 
             try
             {
-                //var newCustomer = await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customerRoltec, token);
+                var newCustomer = await _dataServices.PostAsJsonAsync<CustomerRoltec>("api/users/data", customerRoltec, token);
 
+                return newCustomer;
             }catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
         }
 
-
-
-       //get token from roltec.mx
-        public async Task<string> GetTokenAsync(UserApiRoltec userApiRoltec)
+        /// <summary>
+        /// Actualizar el inventario de Productos de roltec
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task UpdateInventoryProduct(Product product)
         {
+            var token = await _tokenServices.GetTokenAsync();
+
             try
             {
-                var token = await _dataServices.PostAsJsonAsyncItem("api/sessions/data", userApiRoltec);
-                var contentResponse = await token.Content.ReadAsStringAsync();
-                UserRoltecResponse newToken = await Task.Run(() => JsonConvert.DeserializeObject<UserRoltecResponse>(contentResponse));
-
-                return newToken.accessToken;
+                //put
+                var newProduct = await _dataServices.PutAsJsonAsync<Product>("api/products/data", product, token);
+                //response 
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                throw new Exception(ex.Message);
             }
-
         }
+
+        /// <summary>
+        /// Actualizar el estatus de una orden hacia Roltec.mx
+        /// </summary>
+        /// <typeparam name="OrderRoltec"></typeparam>
+        /// <param name="orderRoltec"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<OrderRoltec> UpdateOrderStatus<OrderRoltec>(OrderRoltec orderRoltec)
+        {
+            var token = await _tokenServices.GetTokenAsync();
+
+            try
+            {
+                //orders
+                OrderRoltec order = await _dataServices.PostAsJsonAsync<OrderRoltec>("api/orders/data", orderRoltec, token);
+
+                return order;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Actualizacion de Codigos postales
+        /// </summary>
+        /// <param name="zipCode"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task UpdateZipCode(ZipCode zipCode)
+        {
+            var token = await _tokenServices.GetTokenAsync();
+
+            try
+            {
+                var order = await _dataServices.PostAsJsonAsync<ZipCode>("api/zip_code/data", zipCode, token);
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+       
     }
 }
