@@ -70,7 +70,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
             orderRoltec.InvoiceDetail.XMLInvoiceFile = urlXMLFile;
             orderRoltec.InvoiceDetail.PDFInvoiceFile = urlPDFFile;
 
-            //ejecutar la peticion hacia roltec,mx
+            //ejecutar la peticion hacia roltec.mx
             var response = await _roltecApi.UpdateOrderStatus<OrderRoltec>(orderRoltec);
 
             return response;

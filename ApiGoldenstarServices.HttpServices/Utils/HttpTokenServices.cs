@@ -1,5 +1,6 @@
 ﻿using ApiGoldenstarServices.Models.Roltec;
 using ApiGoldenstarServices.Models.RoltecApi;
+
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,10 @@ namespace ApiGoldenstarServices.HttpServices.Utils
 {
     public class HttpTokenServices : ITokenServices
     {
+        //private readonly GetValuesFromEnvFile _envFile;
+        //Por alguna razon no me deja implementar la clase, la opcion es quenerar una clase similar en esta bibilioteca de clases
+        //e implementarla de la misma forma que en UrlFile.cs
+        public static string hashValue { get; set; }
         private HttpDataServicesBase _dataServices;
         public HttpTokenServices()
         {

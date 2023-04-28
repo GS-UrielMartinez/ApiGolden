@@ -33,6 +33,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
         /// <exception cref="Exception"></exception>
         public async Task<Customer> GetCustomerById(string idCustomer)
         {
+
             //ToDo: agregar todas las propiedades del cliente
             string queryString = $@"select 
                                     cli_clave as CustomerKey,

@@ -5,27 +5,29 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Configuration;
+
 using Microsoft.Extensions.Configuration;
 
-namespace ApiGoldenstarServices.Data.Utils
+namespace ApiGoldenstarServices.Utils
 {
     public class UrlFile
     {
-        private readonly IConfiguration _configuration;
-        public UrlFile( IConfiguration configuration)
-        {
-           
-            _configuration = configuration;
+        private readonly GetValuesFromEnvFile _envFile;
+        public static string hashValue { get; set; }
 
+        public UrlFile(GetValuesFromEnvFile envFile)
+        {
+            _envFile = envFile;
+            hashValue = _envFile.HashKey;
         }
+
 
         public static string EncodeUrl(string fileName)
         {
             RijndaelManaged rijndael = new RijndaelManaged();
             MD5CryptoServiceProvider mD5 = new MD5CryptoServiceProvider();
-            
-            var hash = mD5.ComputeHash(Encoding.ASCII.GetBytes("sdfg"));
+
+            var hash = mD5.ComputeHash(Encoding.ASCII.GetBytes(hashValue));
 
             rijndael.Key = hash;
             rijndael.Mode = CipherMode.ECB;
@@ -33,7 +35,7 @@ namespace ApiGoldenstarServices.Data.Utils
             var cryptoTransform = rijndael.CreateEncryptor();
             var buffer = Encoding.ASCII.GetBytes(fileName);
             var bytes = cryptoTransform.TransformFinalBlock(buffer, 0, buffer.Length);
-            
+
             var urlName = string.Empty;
             foreach (var item in bytes)
             {
@@ -59,7 +61,7 @@ namespace ApiGoldenstarServices.Data.Utils
             RijndaelManaged rijndael = new RijndaelManaged();
             MD5CryptoServiceProvider mD5 = new MD5CryptoServiceProvider();
 
-            var hash = mD5.ComputeHash(Encoding.ASCII.GetBytes("sdf"));
+            var hash = mD5.ComputeHash(Encoding.ASCII.GetBytes(hashValue));
 
             rijndael.Key = hash;
             rijndael.Mode = CipherMode.ECB;

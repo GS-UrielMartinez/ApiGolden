@@ -9,7 +9,7 @@ using System.Data;
 namespace ApiGoldenstarServices.Controllers.Admin.Roltec
 {
     //add roles for this endpoint
-    //[Authorize(Roles = "Roltec", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "AdminGolden", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/v1/Admin/roltec/[controller]")]
     //[ApiController]
     //[Produces("application/json")]
