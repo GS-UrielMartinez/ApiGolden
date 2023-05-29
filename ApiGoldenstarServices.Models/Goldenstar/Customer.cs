@@ -26,7 +26,7 @@ namespace ApiGoldenstarServices.Models.Goldenstar
 
         public string KeyTurn { get; set; } //giro_cve
 
-        public string MeansOfContact { get; set; } //cli_medio
+        public int MeansOfContact { get; set; } //cli_medio
 
         public string? AgentKey { get; set; } // response golden
 

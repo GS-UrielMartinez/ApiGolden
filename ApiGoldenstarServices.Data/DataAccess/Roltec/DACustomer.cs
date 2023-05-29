@@ -43,7 +43,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             parameters.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
             parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
             parameters.Add("@giro_cve", customer.KeyTurn, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.Int);
             parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar);
             parameters.Add("@credito_dias", int.Parse(customer.CreditDays), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar);
@@ -66,7 +66,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             parameters.Add("@cve_uso_cfdi", customer.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@codigo_postal", customer.BillingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
             parameters.Add("@ciudad", customer.BillingAddress.City, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.Int);
+            parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.VarChar);
             parameters.Add("@calle", customer.BillingAddress.Street.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@colonia", customer.BillingAddress.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@telefono", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
@@ -178,7 +178,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             parameters.Add("@giro_cve", customer.KeyTurn, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.VarChar);
             parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@credito_dias", int.Parse(customer.CreditDays), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@credito_dias", customer.CreditDays, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
