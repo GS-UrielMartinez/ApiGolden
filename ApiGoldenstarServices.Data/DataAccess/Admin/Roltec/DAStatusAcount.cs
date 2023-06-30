@@ -19,7 +19,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
         // Get connection to Database
         protected SqlConnection DbConnection()
         {
-            return new SqlConnection(_conectionString.ConnetionString);
+            return new SqlConnection(_conectionString.ConnectionString);
         }
 
 

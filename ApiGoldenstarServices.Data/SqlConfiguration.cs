@@ -8,7 +8,7 @@ namespace ApiGoldenstarServices.Data
 {
     public class SqlConfiguration
     {
-        public SqlConfiguration(string connectionString) => ConnetionString = connectionString;
-        public string ConnetionString { get; set; }
+        public SqlConfiguration(string sqlConnectionString) => ConnectionString = sqlConnectionString;
+        public string ConnectionString { get; set; }
     }
 }

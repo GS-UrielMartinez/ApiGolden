@@ -1,4 +1,5 @@
-﻿using ApiGoldenstarServices.Data.Exceptions;
+﻿using ApiGoldenstarServices.Data.DataAccess.Admin.Roltec;
+using ApiGoldenstarServices.Data.Exceptions;
 using ApiGoldenstarServices.Models.Goldenstar;
 using Dapper;
 using Microsoft.Data.SqlClient;
@@ -25,14 +26,14 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         // Get connection to Database
         public SqlConnection DbConnection()
         {
-            return new SqlConnection(_conectionString.ConnetionString);
+            return new SqlConnection(_conectionString.ConnectionString);
         }
 
         public async Task<bool> AddCustomer(Customer customer)
         {
-
             var db = DbConnection();
             await db.OpenAsync();
+
             // Add paremeters to StoreProcedure
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("@cve_cliente", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
@@ -42,23 +43,22 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             parameters.Add("@apellidoCompra", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
             parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@giro_cve", customer.KeyTurn, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@giro_cve", customer.KeyTurn, DbType.Byte);
             parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.Int);
             parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@credito_dias", int.Parse(customer.CreditDays), (DbType?)SqlDbType.VarChar);
+            parameters.Add("@credito_dias",customer.CreditDays, (DbType?)SqlDbType.Int);
             parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_nombre", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
+
             parameters.Add("@rfc", customer.BillingAddress.Rfc, (DbType?)SqlDbType.VarChar);
-            if (customer.BillingAddress.Rfc.Length == 13)
-            {
-                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
-            }
-            else
-            {
-                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.CompanyName, (DbType?)SqlDbType.VarChar);
-            }
+            string strDenominacionSocial = 
+                (customer.BillingAddress.Rfc.Length == 13)
+                ? customer.BillingAddress.FullName.ToUpper()
+                : customer.BillingAddress.CompanyName
+                ;
+            parameters.Add("@cli_DenominacionSocial", strDenominacionSocial, (DbType?)SqlDbType.VarChar);
 
             parameters.Add("@CveRegimenFiscal", customer.BillingAddress.TaxRegime, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_metodo_pago", customer.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
@@ -66,7 +66,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             parameters.Add("@cve_uso_cfdi", customer.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@codigo_postal", customer.BillingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
             parameters.Add("@ciudad", customer.BillingAddress.City, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.Int);
             parameters.Add("@calle", customer.BillingAddress.Street.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@colonia", customer.BillingAddress.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@telefono", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
@@ -74,8 +74,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
             try
             {
-
-                var cust = await db.ExecuteAsync("RoltecAddCustomer", parameters, commandType: CommandType.StoredProcedure);
+                var cust = await db.ExecuteAsync("spRoltecAddCustomer", parameters, commandType: CommandType.StoredProcedure);
                 //message
 
                 await db.CloseAsync();
@@ -106,8 +105,16 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         /// <exception cref="Exception"></exception>
         public async Task<CustomerResponse> GetCustomerResponseById(string idCustomer)
         {
+            string queryString = "" 
+                + " select " 
+                + " cli_clave as [CustomerKey], "
+                + " cli_cvematriz as [ParentCustomerKey], "
+                + " cli_agente as [AgentKey], "
 
-            string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_claveExterna = '{idCustomer}'";
+                + " cli_claveExterna as [IdCustomer] "
+                + " from inctclie (nolock) " 
+                + " where cli_claveExterna = '" + idCustomer.Trim() + "' "
+                ;
 
             SqlConnection sqlConnection = DbConnection();
             sqlConnection.Open();
@@ -169,29 +176,28 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             DynamicParameters parameters = new DynamicParameters();
             parameters.Add("@customerKey", customer.CustomerKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_cliente", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);
+            //parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);  // Este parámetro es sólo para  AddCustomer()
+            parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);  //TODO: el SP 'RoltecUpdateCustomer' recibe Este parámetro pero no lo utiliza para nada
             parameters.Add("@nombreCompra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@apellidoCompra", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
             parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@giro_cve", customer.KeyTurn, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@giro_cve", customer.KeyTurn, DbType.Byte);
+            parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.Int);
             parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@credito_dias", customer.CreditDays, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@credito_dias", customer.CreditDays, (DbType?)SqlDbType.Int);
             parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
             parameters.Add("@cli_nombre", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
+
             parameters.Add("@rfc", customer.BillingAddress.Rfc, (DbType?)SqlDbType.VarChar);
-            if (customer.BillingAddress.Rfc.Length == 13)
-            {
-                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar);
-            }
-            else
-            {
-                parameters.Add("@cli_DenominacionSocial", customer.BillingAddress.CompanyName, (DbType?)SqlDbType.VarChar);
-            }
+            string strDenominacionSocial =
+                (customer.BillingAddress.Rfc.Length == 13)
+                ? customer.BillingAddress.FullName.ToUpper()
+                : customer.BillingAddress.CompanyName
+                ;
+            parameters.Add("@cli_DenominacionSocial", strDenominacionSocial, (DbType?)SqlDbType.VarChar);
 
             parameters.Add("@CveRegimenFiscal", customer.BillingAddress.TaxRegime, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_metodo_pago", customer.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
@@ -208,7 +214,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             try
             {
 
-                var cust = await db.ExecuteAsync("RoltecUpdateCustomer", parameters, commandType: CommandType.StoredProcedure);
+                var cust = await db.ExecuteAsync("spRoltecUpdateCustomer", parameters, commandType: CommandType.StoredProcedure);
                 //message
 
                 await db.CloseAsync();
@@ -347,7 +353,16 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         /// <returns></returns>
         public async Task<bool> GetCustomerByCustumerKey(string customerKey)
         {
-            string queryString = $@"select cli_clave as CustomerKey,cli_cvematriz as ParentCustomerKey,cli_agente as AgentKey from inctclie (nolock) where cli_clave = '{customerKey}'";
+            string queryString = ""
+                + " select "
+                + " cli_clave as [CustomerKey], "
+                + " cli_cvematriz as [ParentCustomerKey], "
+                + " cli_agente as [AgentKey], "
+
+                + " cli_claveExterna as [IdCustomer] "
+                + " from inctclie (nolock) "
+                + " where cli_clave = '" + customerKey.Trim() + "' "
+                ;
 
             SqlConnection sqlConnection = DbConnection();
 
@@ -400,9 +415,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             Customer? customer = default;
             try
             {
-
                 customer = await sqlConnection.QueryFirstOrDefaultAsync<Customer>(queryString);
-
 
                 return customer;
             }

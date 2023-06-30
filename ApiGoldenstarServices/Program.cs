@@ -5,7 +5,7 @@ using ApiGoldenstarServices.Data;
 using ApiGoldenstarServices.Data.DataAccess.Auth;
 using ApiGoldenstarServices.Data.DataAccess.Goldenstar;
 using ApiGoldenstarServices.Data.DataAccess.Roltec;
-using ApiGoldenstarServices.Data.Utils;
+//using ApiGoldenstarServices.Data.Utils;
 using ApiGoldenstarServices.HttpServices.ExternalServices.Roltec;
 using ApiGoldenstarServices.HttpServices.Utils;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,13 +24,13 @@ builder.Services.AddSingleton(SqlConnectionConfiguration);
 
 //builder.Services.AddScoped(IConfiguration, ConfigurationManager);
 //.Get<List<ExpandoObject>>();
-var HashKey = new GetValuesFromEnvFile(builder.Configuration.GetSection("ConfigEnv").Get<List<string>>());
-builder.Services.AddSingleton(HashKey);
+//var HashKey = new GetValuesFromEnvFile(builder.Configuration.GetSection("ConfigEnv").Get<List<string>>());
+//builder.Services.AddSingleton(HashKey);
 
 //Global Connections services to db
 builder.Services.AddScoped<IUser, DAUser>();
 builder.Services.AddScoped<ICustomer, DACustomer>();
-builder.Services.AddScoped<IOrder, DAOrder>();
+builder.Services.AddScoped<DAOrder>(); //builder.Services.AddScoped<IOrder, DAOrder>(); 
 
 
 //Global connections to API Services

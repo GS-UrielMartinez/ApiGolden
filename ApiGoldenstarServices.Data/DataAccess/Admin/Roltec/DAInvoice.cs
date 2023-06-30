@@ -1,4 +1,4 @@
-﻿using ApiGoldenstarServices.Data.Utils;
+﻿//using ApiGoldenstarServices.Data.Utils;
 using ApiGoldenstarServices.HttpServices.ExternalServices.Roltec;
 using ApiGoldenstarServices.Models.Goldenstar;
 using ApiGoldenstarServices.Models.ServicesModels.RoltecApi;
@@ -29,7 +29,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
         // Get connection to Database
         protected SqlConnection DbConnection()
         {
-            return new SqlConnection(_conectionString.ConnetionString);
+            return new SqlConnection(_conectionString.ConnectionString);
         }
 
        
@@ -39,8 +39,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
             //obtener la factura
             
             // generar url
-            var urlPDFFile = UrlFile.EncodeUrl(folio+".pdf");
-            var urlXMLFile = UrlFile.EncodeUrl(folio+".xml");
+           // var urlPDFFile = UrlFile.EncodeUrl(folio+".pdf"); se modifico
+            //var urlXMLFile = UrlFile.EncodeUrl(folio+".xml"); se modifico
             // obtener la orden asociada a la factura
             InvoiceResponse orderInvoiced = await GetOrderByFolio(folio.Substring(3));
             // Obtener la orden
@@ -67,8 +67,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Admin.Roltec
             //invoiceDetail
             orderRoltec.InvoiceDetail.IdInvoice = 1;
             orderRoltec.InvoiceDetail.TypeInvoice = folio.Substring(0, 3);
-            orderRoltec.InvoiceDetail.XMLInvoiceFile = urlXMLFile;
-            orderRoltec.InvoiceDetail.PDFInvoiceFile = urlPDFFile;
+            //orderRoltec.InvoiceDetail.XMLInvoiceFile = urlXMLFile; se comento
+            //orderRoltec.InvoiceDetail.PDFInvoiceFile = urlPDFFile; se comento
 
             //ejecutar la peticion hacia roltec.mx
             var response = await _roltecApi.UpdateOrderStatus<OrderRoltec>(orderRoltec);

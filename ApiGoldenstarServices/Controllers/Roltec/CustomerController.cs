@@ -1,6 +1,7 @@
 ﻿using ApiGoldenstarServices.Controllers.Auth;
 using ApiGoldenstarServices.Data.DataAccess.Roltec;
 using ApiGoldenstarServices.Models.Goldenstar;
+using ApiGoldenstarServices.Models.Goldenstar.BaseModels;
 using Azure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -21,11 +22,7 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         public CustomerController(ICustomer dACustomer)
         {
             _DACustomer = dACustomer;
-
-
-
         }
-
 
 
         /// <summary>
@@ -98,11 +95,11 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         {
             var newCustomerResponse = new
             {
-              Message = "Datos incompletos"
-
+                Message = "El Servicio Web NO recibió ningún dato para crear el registro del CLiente."
             };
-            var _Message = "";
             if (customer == null) return BadRequest(newCustomerResponse);
+
+            var _Message = "";
 
             //To Do :validate if Customer Exist
 
@@ -114,63 +111,79 @@ namespace ApiGoldenstarServices.Controllers.Roltec
             }
             catch (Exception ex)
             {
-
-                return BadRequest(ex.Message);
+                return BadRequest("NO fue posible Agregar el registro del CLiente: " + ex.Message);
             }
 
             //get new customer
-            var newCustomer = await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
+            var newCustomer =
+                await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
+            newCustomer.Message = _Message;
 
-            newCustomer.Message= _Message;
-            
-            return StatusCode(201, newCustomer);
-
+            return
+                StatusCode((int)StatusCodes.Status201Created, newCustomer);
         }
 
         //update
         [HttpPut]
-        [Route("Update/{CustomerKey}")]
+        [Route("Update/{idCustomer}")] //[Route("Update/{CustomerKey}")] 
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer, string CustomerKey)
+        public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer, string idCustomer) 
+            //public async Task<IActionResult> UpdateCustomer([FromBody] Customer customer, string CustomerKey) 
         {
             var newCustomerResponse = new
             {
-                Message = "Datos incompletos"
-
+                Message = "El Servicio Web NO recibió ningún dato del CLiente para ser Actualizado."
             };
-            var _Message = "";
             if (customer == null) return BadRequest(newCustomerResponse);
 
-            //To Do :validate if Customer Exist
-            var customerExist =await _DACustomer.GetCustomerByCustumerKey(CustomerKey);
-            if (customerExist == false)
+            idCustomer = idCustomer.Trim();
+            customer.IdCustomer = customer.IdCustomer.Trim();
+            if (idCustomer != customer.IdCustomer) 
             {
-                var customerResponse = new
-                {
-                    Message = $@"El cliente con clave {CustomerKey} no existe"
-                };
-                return BadRequest(customerResponse);
+                return BadRequest("Los datos contienen el IdCustomer " + customer.IdCustomer 
+                    + ", que es distinto del IdCustomer " + idCustomer + " especificado para la actualizacion.");
             }
+
+            var _Message = "";
+
             try
             {
+                Customer _CustomerById =
+                    await _DACustomer.GetCustomerById(idCustomer);
+                //var customerExist = await _DACustomer.GetCustomerByCustumerKey(CustomerKey);
+                if (_CustomerById == null)
+                {
+                    var customerResponse = new
+                    {
+                        //Message = $@"El cliente con clave {idCustomer} no existe"
+                        Message = $@"El cliente con idCustomer {idCustomer} no existe"
+                    };
+                    return BadRequest(customerResponse);
+                }
+
+                if (customer.CustomerKey.Trim() != _CustomerById.CustomerKey.Trim()) 
+                    throw new Exception("El valor contenido en CustomerKey NO es el que corresponde al cliente con idCustomer " + idCustomer);
+                customer.CustomerKey = _CustomerById.CustomerKey;
+
                 await _DACustomer.UpdateCustomer(customer);
 
-                _Message = "Cliente actualizado correctamente correctamente";
+                _Message = "Cliente actualizado correctamente";
             }
             catch (Exception ex)
             {
-
-                return BadRequest(ex.Message);
+                return BadRequest("NO fue posible Actualizar los datos del CLiente: " + ex.Message);
             }
 
-            //get new customer
-            var newCustomer = await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
+            // Volver a obtener los datos del cliente que fueron actualizados
+            CustomerResponse newCustomer =
+                //await _DACustomer.GetCustomerResponseById(customer.IdCustomer);
+                await _DACustomer.GetCustomerResponseById(idCustomer);
 
             newCustomer.Message = _Message;
 
-            return StatusCode(201, newCustomer);
-
+            return 
+                StatusCode((int)StatusCodes.Status200OK, newCustomer);
         }
 
 

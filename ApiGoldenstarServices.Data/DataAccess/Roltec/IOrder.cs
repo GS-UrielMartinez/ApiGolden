@@ -11,6 +11,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
     {
         //main functions
         Task<OrderResponse> AddOrder(Order order);
+        Task<Order> GetOrderByIdAsync(string idOrder);
 
         //other functions
         Task<bool> ValidateCustomer(string customerId);
