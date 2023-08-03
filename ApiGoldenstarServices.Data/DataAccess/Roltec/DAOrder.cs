@@ -13,7 +13,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 {
     // -------------------------------------------------------
 
-    public class EjecutorSql    //para que mande llamar métodos de  _DbConnection  sin visibilizar este objeto
+    public class EjecutorSql    //para que mande llamar métodos de  _DbConnection  sin visibilizar este objeto 
     {
         private string _ConnectionString;
 
@@ -111,20 +111,6 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 
 
         #region " Re-Direccionamiento a Métodos de  _DbConnection (SqlConnection) "
-
-        //
-        public async void NoHaceNada() 
-        {
-            //
-            //var _Reader = await this._DbConnection.ExecuteReaderAsync("", transaction: this._DbTransaction);
-            //string maxPrimaryKey = await this._DbConnection.QuerySingleOrDefaultAsync<string>("");
-            //string maxPrimaryKey = this._DbConnection.QuerySingleOrDefault<string>("");
-            //int executeInsertOrder = await this._DbConnection.ExecuteAsync("", new object(), commandType: CommandType.Text);
-            //SqlMapper.GridReader gridReader = this._DbConnection.QueryMultiple(""); 
-            IEnumerable<Order> queriedOrders =
-                await this._DbConnection.QueryAsync<Order>("", commandType: CommandType.Text);
-            //
-        }
 
         public IDataReader ExecuteReader(
             string sql, 
@@ -310,7 +296,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
         {
             Exception ex = 
                 new Exception("Falta Sustituir la implementación de  DAOrder.DbConnection(),  por las funciones de 'EjecutorSql'.");
-            if (ex != null) throw ex;
+            //if (ex != null) throw ex;
 
             return new SqlConnection(this._SqlConfiguration.ConnectionString);
         }
@@ -469,7 +455,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 
             try
             {
-                Order order =
+                Order? order =
                     new Order();
                 var aliasColumnPairs =
                     new Dictionary<string, string>();
@@ -719,7 +705,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             }
         }
 
-        public async Task<Order> UpdateOrderHeaderAsync(Order order)
+        public async Task<Order> UpdateOrderHeaderAsync(Order order) 
         {
             if (order == null)
                 throw new Exception("El Servicio Web NO recibió ningún dato de la Orden para ser Actualizado.");  // UPDATE
@@ -765,7 +751,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                 #endregion 
 
 
-                int executeInsertOrder =
+                int executeUpdateOrder =
                     await this._EjecutorSql.ExecuteAsync(strQueryUpdateParametrizado, dynParameters, commandType: CommandType.Text);
 
                 Order updatedOrder =
@@ -890,7 +876,9 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             parameters.Add("@paqueteria", "", (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_forma_pago", order.BillingAddress.PaymentTypeKey, (DbType?)SqlDbType.VarChar);
             //parameters.Add("@no_parcialidades", order.IdOrder.ToUpper(), (DbType?)SqlDbType.VarChar);
-            parameters.Add("@dias_credito", order.BillingAddress.CreditDays, (DbType?)SqlDbType.VarChar);
+
+            parameters.Add("@dias_credito", order.BillingAddress.CreditDays, DbType.Int16);
+
             parameters.Add("@ord_cupon", order.Cupon, (DbType?)SqlDbType.VarChar);
             parameters.Add("@descuentoimporte", order.Discount, (DbType?)SqlDbType.VarChar);
             parameters.Add("@subtotal", order.Subtotal, (DbType?)SqlDbType.VarChar);
@@ -935,6 +923,15 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             {
                 await db.OpenAsync();
                 DynamicParameters parameters = new DynamicParameters();
+
+                //TODO: Quitar estos parches cuando se corrijan los tamaños
+                // de los parámetros '@bcve_ciudad' y '@scve_ciudad'  en el SP 'Magento_Orden_Agregar_Magento_D' 
+                if (order.BillingAddress.CityKey == null) order.BillingAddress.CityKey = "";
+                if (order.ShippingAddress.CityKey == null) order.ShippingAddress.CityKey = "";
+                order.BillingAddress.CityKey = 
+                    order.BillingAddress.CityKey.Substring(0, 4);
+                order.ShippingAddress.CityKey = 
+                    order.ShippingAddress.CityKey.Substring(0, 4);
 
                 parameters.Add("@id_ord", order.IdOrder, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@ord_item", orderItem.orderItemId, (DbType?)SqlDbType.VarChar);
@@ -1029,7 +1026,15 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 
             parameters.Add("@cve_cliente", order.CustomerId, (DbType?)SqlDbType.VarChar);
 
-            parameters.Add("@cve_sucursal", order.ShippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar);
+            //TODO: quitar estos parches cuando se corrija el tamaño del parámetro @cve_sucursal  en el SP
+            if (order.ShippingAddress.ShippingAddressId == null)
+                order.ShippingAddress.ShippingAddressId = "";
+            if (order.ShippingAddress.CityKey == null) order.ShippingAddress.CityKey = "";
+
+            //TODO: corregir tamaño del parámetro en el SP
+            parameters.Add("@cve_sucursal", order.ShippingAddress.ShippingAddressId.Substring(0,5), (DbType?)SqlDbType.VarChar);
+            //parameters.Add("@cve_sucursal", order.ShippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar);
+
             parameters.Add("@calle", order.ShippingAddress.Street, (DbType?)SqlDbType.VarChar);
             parameters.Add("@colonia", order.ShippingAddress.Colony, (DbType?)SqlDbType.VarChar);
             parameters.Add("@ciudad", order.ShippingAddress.City, (DbType?)SqlDbType.VarChar);
@@ -1037,7 +1042,11 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 
             parameters.Add("@pais", "Mexico", (DbType?)SqlDbType.VarChar);
             parameters.Add("@codigo_postal", order.ShippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cve_ciudad", order.ShippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
+            //TODO: corregir tamaño del parámetro en el SP
+            parameters.Add("@cve_ciudad", order.ShippingAddress.CityKey.Substring(0,4), (DbType?)SqlDbType.VarChar);
+            //parameters.Add("@cve_ciudad", order.ShippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
             parameters.Add("@cli_nombre", order.CustomerName, (DbType?)SqlDbType.VarChar);
 
             try
@@ -1071,7 +1080,9 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             //parameters.Add("@paqueteria", order.CustomerId, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_forma_pago", order.BillingAddress.PaymentTypeKey, (DbType?)SqlDbType.VarChar);
             //parameters.Add("@no_parcialidades", order.CustomerId, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@dias_credito", order.BillingAddress.CreditDays, (DbType?)SqlDbType.VarChar);
+
+            parameters.Add("@dias_credito", order.BillingAddress.CreditDays, DbType.Int16);
+
             parameters.Add("@ord_cupon", order.Cupon, (DbType?)SqlDbType.VarChar);
             parameters.Add("@descuentoimporte", order.Discount, (DbType?)SqlDbType.VarChar);
             parameters.Add("@subtotal", order.Subtotal, (DbType?)SqlDbType.VarChar);
@@ -1083,9 +1094,14 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             parameters.Add("@cve_metodo_pago", order.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@metodo_pago_magento", order.PaymentMethod, (DbType?)SqlDbType.VarChar);
             //parameters.Add("@orden_compra_credito", order.CustomerId, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@scodigo_postal", order.ShippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
             parameters.Add("@ordID", order.Folio, (DbType?)SqlDbType.VarChar);
             parameters.Add("@notas", order.Notes, (DbType?)SqlDbType.VarChar);
+
+
+            //TODO: Cuando el código postal NO existe, el StoredProcedure falla sin especificar la causa 
+            // porque esto ocasiona que NO se obtenga una clave de Paquetería
+            // y se intente insertar un valor NULL en una columna 'NOT NULL'
+            parameters.Add("@scodigo_postal", order.ShippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
 
 
             try
@@ -1116,7 +1132,13 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                 parameters.Add("@ordID", order.IdOrder, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@ord_cli", order.CustomerId, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@ord_item", orderItem.orderItemId, (DbType?)SqlDbType.VarChar);
+
+
+                //TODO: Los valores NO existentes de  orderItem.Sku ( [Magento_d].Sku ),
+                // provocan división sobre Cero en el SP 'Magento_Orden_Agregar_Detalle1'
                 parameters.Add("@sku", orderItem.Sku, (DbType?)SqlDbType.VarChar);
+
+
                 parameters.Add("@ord_nombre", order.CustomerName, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@ord_cant", orderItem.Quantity, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@ord_punit", orderItem.UnitPrice, (DbType?)SqlDbType.VarChar);
@@ -1126,26 +1148,38 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                 parameters.Add("@bcve_sucursal", order.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@bcalle", order.BillingAddress.Street, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@bcolonia", order.BillingAddress.Colony, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@bciudad", order.BillingAddress.City, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@bcodigo_postal", order.BillingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@bcve_ciudad", order.BillingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
                 //@s shipping
                 parameters.Add("@scve_sucursal", order.ShippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@scalle", order.ShippingAddress.Street, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@scolonia", order.ShippingAddress.Colony, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@sciudad", order.ShippingAddress.City, (DbType?)SqlDbType.VarChar);
                 parameters.Add("@scodigo_postal", order.ShippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@scve_ciudad", order.ShippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
+
+                //TODO: Quitar este parche cuando se corrija el tamaño del parámetro '@scve_ciudad' en el StoredProcedure 
+                if (order.ShippingAddress.CityKey == null) 
+                    order.ShippingAddress.CityKey = "";
+
+                //TODO: Falta corregir el tamaño del parámetro '@scve_ciudad' en el StoredProcedure
+                parameters.Add("@scve_ciudad", order.ShippingAddress.CityKey.Substring(0,4), (DbType?)SqlDbType.VarChar);
+                //parameters.Add("@scve_ciudad", order.ShippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+
+                #region " parámetros que el SP 'Magento_Orden_Agregar_Detalle1'  NO utiliza para nada " 
+
+                parameters.Add("@bcve_ciudad", order.BillingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+                parameters.Add("@bciudad", order.BillingAddress.City, (DbType?)SqlDbType.VarChar);
+                parameters.Add("@sciudad", order.ShippingAddress.City, (DbType?)SqlDbType.VarChar);
+
+                #endregion 
 
 
                 try
                 {
                     var newOrder = await db.ExecuteAsync("Magento_Orden_Agregar_Detalle1", parameters, commandType: CommandType.StoredProcedure);//modificar el SP
-                    
                 }
                 catch (Exception ex)
                 {
-
                     throw new Exception(ex.Message);
                 }
                 finally { await db.CloseAsync();}
@@ -1178,6 +1212,10 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
 
             try
             {
+                //TODO: El SP 'Magento_Orden_Agregar_RolloConsumo' intenta Insertar
+                // [Magento_d].scve_ciudad, que es  varchar(5)
+                // en [opmtdest_RolloConsumo_Destinos].Ciudad, que es  varchar(4) 
+                // ...y al truncar TRUENA! 
                 await db.ExecuteAsync("Magento_Orden_Agregar_RolloConsumo", parameters, commandType: CommandType.StoredProcedure);//modificar el SP
 
                 return true;            

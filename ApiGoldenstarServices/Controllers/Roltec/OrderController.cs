@@ -61,7 +61,8 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         //[Route("Header/Update/{idOrder}")]  
         //[ProducesResponseType(StatusCodes.Status200OK)]  //UPDATE, [HttpPut]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> CreateOrderHeader([FromBody] Order order)  //INSERT, [HttpPost] 
+        private 
+            async Task<IActionResult> CreateOrderHeader([FromBody] Order order)  //INSERT, [HttpPost] 
         //public async Task<IActionResult> UpdateOrderHeader([FromBody] Order order, string idOrder)  //UPDATE, [HttpPut]
         {
             if (order == null)
@@ -97,7 +98,8 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         //[Route("Header/Create")]
         //[ProducesResponseType(StatusCodes.Status201Created)]  //INSERT, [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateOrderHeader([FromBody] Order order, string idOrder)  //UPDATE, [HttpPut] 
+        private
+            async Task<IActionResult> UpdateOrderHeader([FromBody] Order order, string idOrder)  //UPDATE, [HttpPut] 
         {
             if (order == null)
                 return BadRequest("El Servicio Web NO recibió ningún dato de la Orden para ser Actualizado.");  //UPDATE, [HttpPut]
@@ -134,7 +136,8 @@ namespace ApiGoldenstarServices.Controllers.Roltec
         //[Route("Header/Create")]
         //[ProducesResponseType(StatusCodes.Status201Created)]  //INSERT, [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> EditOrderHeadersByCustomerId(string customerId)  //UPDATE, [HttpPut] 
+        private
+            async Task<IActionResult> EditOrderHeadersByCustomerId(string customerId)  //UPDATE, [HttpPut] 
         // Ejemplo para probar Manejo de Transacción
         {
             try

@@ -8,19 +8,19 @@ namespace ApiGoldenstarServices.Models.Goldenstar
 {
     public class ShippingAddress
     {
-        //To do: Agregar mas campos que sean necesarios en todas las 
-        //paqueterias
+        public string? ShippingAddressId { get; set; } 
+        public string? CustomerKey { get; set; }  
+        //public string? IdCustomer { get; set; }  // DEBERÍA SER  CustomerKey 
+        //public string? CustomerId { get; set; }//cve_cliente  // NO tiene referencias, podría cambiarse a "IdCustomer"
+        public string? Alias { get; set; } //sucursal
 
-        public string? ShippingAddressId { get; set; } // cve_sucursal
-        public string? CustomerId { get; set; }//cve_cliente
-        public string? Alias { get; set; }//sucursal
+        public string? FullAddress { get; set; } //Domicilio  [ = (Street + ' ' + Colony) ]
+        public string? Street { get; set; } // NO tiene columna en BD :  Domicilio = (Street + ' ' + Colony) 
+        public string? Colony { get; set; } // NO tiene columna en BD :  Domicilio = (Street + ' ' + Colony) 
 
-        public string? Street { get; set; } //calle
-        public string? Colony { get; set; } //colonia
-        public string? City { get; set; } //ciudad
+        public string? City { get; set; } 
         public string? ZipCode { get; set; } //codigo_postal
         public string? CityKey { get; set; } //cve_ciudad
-        public string? Phone { get; set; }//telefono
-
+        public string? Phone { get; set; } 
     }
 }

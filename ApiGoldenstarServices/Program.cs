@@ -29,7 +29,7 @@ builder.Services.AddSingleton(SqlConnectionConfiguration);
 
 //Global Connections services to db
 builder.Services.AddScoped<IUser, DAUser>();
-builder.Services.AddScoped<ICustomer, DACustomer>();
+builder.Services.AddScoped<DACustomer>(); //builder.Services.AddScoped<ICustomer, DACustomer>(); 
 builder.Services.AddScoped<DAOrder>(); //builder.Services.AddScoped<IOrder, DAOrder>(); 
 
 
