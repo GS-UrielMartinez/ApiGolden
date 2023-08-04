@@ -1,4 +1,6 @@
-﻿using ApiGoldenstarServices.Data.DataAccess.Admin.Roltec;
+﻿
+using ApiGoldenstarServices.Data.DataAccess; 
+using ApiGoldenstarServices.Data.DataAccess.Admin.Roltec;
 using ApiGoldenstarServices.Data.DataAccess.Goldenstar;
 using ApiGoldenstarServices.Data.Exceptions;
 using ApiGoldenstarServices.Models.Goldenstar;
@@ -19,45 +21,31 @@ using System.Transactions;
 
 namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 {
-    public class DACustomer // : ICustomer
+    public class DACustomer : DABase  // : ICustomer
     {
-        private SqlConfiguration _SqlConfiguration;
-        private EjecutorSql _EjecutorSql;
+        //private SqlConfiguration _SqlConfiguration;
+        //private EjecutorSql _EjecutorSql;
 
 
-        public DACustomer(SqlConfiguration sqlConfiguration) 
+        public DACustomer(SqlConfiguration sqlConfiguration) : base(sqlConfiguration)
         {
-            if (sqlConfiguration == null)
-            {
-                throw
-                    new ArgumentNullException(
-                        nameof(sqlConfiguration),
-                        "NO se puede obtener ConnectionString de un objeto Nulo de tipo 'SqlConfiguration'."
-                        );
-            }
-
-            this._EjecutorSql = new EjecutorSql(sqlConfiguration.ConnectionString);
-            this._SqlConfiguration = sqlConfiguration;
+            //
         }
-        public DACustomer(SqlConnection sqlConnection) 
+        public DACustomer(SqlConnection sqlConnection) : base(sqlConnection)
         {
-            if (sqlConnection == null)
-            {
-                throw
-                    new ArgumentNullException(
-                        nameof(sqlConnection),
-                        "Se requiere una conexión de Base de Datos para instanciar un objeto de Acceso a Datos de Clientes."
-                        );
-            }
-
-            this._EjecutorSql = new EjecutorSql(sqlConnection);
-            this._SqlConfiguration = new SqlConfiguration(sqlConnection.ConnectionString);
+            //
         }
 
         // Get connection to Database
         public SqlConnection DbConnection()
         {
-            return new SqlConnection(_SqlConfiguration.ConnectionString);
+            Exception ex =
+                new Exception("Los Métodos que implementan DAOrder.DbConnection(),  ya NO deben ni requieren usarse.");
+            if (ex != null) throw ex;
+
+            //return new SqlConnection(_SqlConfiguration.ConnectionString);
+            return 
+                base.DbConnectionBase();
         }
 
         #region " Add ( Customer Or BillingAddress ) "
