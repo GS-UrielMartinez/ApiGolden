@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace ApiGoldenstarServices.Data.DataAccess.Auth
 {
-    public class DAUser : IUser
+    public class DAUser // : IUser
     {
         private SqlConfiguration _conectionString;
 

@@ -28,7 +28,7 @@ builder.Services.AddSingleton(SqlConnectionConfiguration);
 //builder.Services.AddSingleton(HashKey);
 
 //Global Connections services to db
-builder.Services.AddScoped<IUser, DAUser>();
+builder.Services.AddScoped<DAUser>(); //builder.Services.AddScoped<IUser, DAUser>(); 
 builder.Services.AddScoped<DACustomer>(); //builder.Services.AddScoped<ICustomer, DACustomer>(); 
 builder.Services.AddScoped<DAOrder>(); //builder.Services.AddScoped<IOrder, DAOrder>(); 
 

@@ -40,7 +40,10 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         public SqlConnection DbConnection()
         {
             Exception ex =
-                new Exception("Los Métodos que implementan DAOrder.DbConnection(),  ya NO deben ni requieren usarse.");
+                new Exception(
+                    "Los Métodos que implementan " 
+                    + this.GetType().Name + ".DbConnection(),  ya NO deben ni requieren usarse."
+                );
             if (ex != null) throw ex;
 
             //return new SqlConnection(_SqlConfiguration.ConnectionString);
@@ -83,7 +86,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this._AddCustomerOrBillingAddressAsync(customer);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -193,7 +197,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 }
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -283,18 +288,18 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                 DynamicParameters paramsGet = new DynamicParameters();
 
-                paramsGet.Add("@folio_minimo", "20000", (DbType?)SqlDbType.VarChar);
-                paramsGet.Add("@folio_maximo", "50000", (DbType?)SqlDbType.VarChar);
+                paramsGet.Add("@folio_minimo", "20000", base.ToDbType(SqlDbType.VarChar));
+                paramsGet.Add("@folio_maximo", "50000", base.ToDbType(SqlDbType.VarChar));
                 string newCustomerKey =
                     await this._EjecutorSql.QuerySingleOrDefaultAsync<string>(strQueryFolio, paramsGet, commandType: CommandType.Text);
 
                 // Obtener la  Zona  que corresponde al  Estado
-                paramsGet.Add("@estado", customer.BillingAddress.State, DbType.Int32); // SqlDbType.Int
+                paramsGet.Add("@estado", customer.BillingAddress.State, base.ToDbType(SqlDbType.Int)); // SqlDbType.Int
                 string claveZona =
                     await this._EjecutorSql.QuerySingleOrDefaultAsync<string>(strQueryZona, paramsGet, commandType: CommandType.Text);
 
                 // Obtener el  AgenteWeb  que corresponde a la  Zona
-                paramsGet.Add("@ZONA", claveZona, (DbType?)SqlDbType.VarChar);
+                paramsGet.Add("@ZONA", claveZona, base.ToDbType(SqlDbType.VarChar));
                 string agenteWeb =
                     await this._EjecutorSql.QuerySingleOrDefaultAsync<string>(strQueryAgente, paramsGet, commandType: CommandType.Text);
 
@@ -320,42 +325,43 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                 #region " Parámetros con Valores  para el Query " 
 
-                paramsInsert.Add("@cli_clave", newCustomerKey, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_claveExterna", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+                paramsInsert.Add("@cli_clave", newCustomerKey, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_claveExterna", customer.IdCustomer, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_cvematriz", customer.ParentCustomerKey, base.ToDbType(SqlDbType.VarChar));
 
                 // Valores originalmente calculados por el  SqlStoredProcedure
-                paramsInsert.Add("@cli_dias", diasCredito, DbType.Int16); // SqlDbType.SmallInt
-                paramsInsert.Add("@dcartera", diasCartera, DbType.Int16); // SqlDbType.SmallInt
-                paramsInsert.Add("@cli_cvecred", cveCredito, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@tasa", tasaIVA, DbType.Decimal); // SqlDbType.Decimal
-                paramsInsert.Add("@cli_ncar", claveZona, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_agente", agenteWeb, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_dias", diasCredito, base.ToDbType(SqlDbType.SmallInt)); // SqlDbType.SmallInt
+                paramsInsert.Add("@dcartera", diasCartera, base.ToDbType(SqlDbType.SmallInt)); // SqlDbType.SmallInt
+                paramsInsert.Add("@cli_cvecred", cveCredito, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@tasa", tasaIVA, base.ToDbType(SqlDbType.Decimal)); // SqlDbType.Decimal
+                paramsInsert.Add("@cli_ncar", claveZona, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_agente", agenteWeb, base.ToDbType(SqlDbType.VarChar));
 
                 // Valores Hard-Codeados
-                paramsInsert.Add("@cli_autcredito", "S", (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_montoautorizado", 0, DbType.Decimal); // SqlDbType.Decimal
-                paramsInsert.Add("@cli_pob", "0", (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@creditoWeb", "", (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_id_contacto", 1, DbType.Int32); // SqlDbType.Int
+                paramsInsert.Add("@cli_autcredito", "S", base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_montoautorizado", 0, base.ToDbType(SqlDbType.Decimal)); // SqlDbType.Decimal
+                paramsInsert.Add("@cli_pob", "0", base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@creditoWeb", "", base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_id_contacto", 1, base.ToDbType(SqlDbType.Int)); // SqlDbType.Int
 
                 // Email
-                paramsInsert.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@correo_notificaciones", customer.Email, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_REPmail", customer.Email, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_email", customer.Email, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@correo_notificaciones", customer.Email, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_REPmail", customer.Email, base.ToDbType(SqlDbType.VarChar));
 
                 // Se agregó una propiedad  BillingAddress.Email  que apunta a ésta columna 
                 // para que forme parte de los datos de Facturación, y ya NO de los datos básicos.
-                //paramsInsert.Add("@Cli_FacturaMail", customer.Email, (DbType?)SqlDbType.VarChar);
+                //paramsInsert.Add("@Cli_FacturaMail", customer.Email, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cli_compra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);  // cli_compra
-                paramsInsert.Add("@Cli_CompraApellido", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar); // Cli_CompraApellido
-                paramsInsert.Add("@cli_giro", customer.KeyTurn, DbType.Byte);
-                paramsInsert.Add("@Cli_Medio", customer.MeansOfContact, DbType.Byte);
+                paramsInsert.Add("@cli_compra", customer.ShoppingName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@Cli_CompraApellido", customer.ShoppingFirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_giro", customer.KeyTurn, base.ToDbType(SqlDbType.TinyInt));
+                paramsInsert.Add("@Cli_Medio", customer.MeansOfContact, base.ToDbType(SqlDbType.TinyInt));
 
-                paramsInsert.Add("@cli_tel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_tel1", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_tel", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_tel1", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
 
                 #endregion  
 
@@ -395,33 +401,34 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 BillingAddress _billAds =
                     customer.BillingAddress;
 
-                paramsInsert.Add("@idBillingAddress", _billAds.IdBillingAddress, (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+                paramsInsert.Add("@idBillingAddress", _billAds.IdBillingAddress, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cli_rfc", _billAds.Rfc, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_rfc", _billAds.Rfc, base.ToDbType(SqlDbType.VarChar));
                 string strDenominacionSocial =
                     (_billAds.Rfc.Length == 13)
                     ? _billAds.FullName.ToUpper()
                     : _billAds.CompanyName
                     ;
-                paramsInsert.Add("@cli_DenominacionSocial", strDenominacionSocial, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_DenominacionSocial", strDenominacionSocial, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cli_nom", _billAds.Name.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nom 
-                paramsInsert.Add("@cli_apat", _billAds.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@cli_amat", _billAds.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_nom", _billAds.Name.ToUpper(), base.ToDbType(SqlDbType.VarChar)); 
+                paramsInsert.Add("@cli_apat", _billAds.FirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_amat", _billAds.LastName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cli_nombre", _billAds.FullName.ToUpper(), (DbType?)SqlDbType.VarChar); 
-                paramsInsert.Add("@cli_nomComercial", _billAds.FullName.ToUpper(), (DbType?)SqlDbType.VarChar); 
+                paramsInsert.Add("@cli_nombre", _billAds.FullName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@cli_nomComercial", _billAds.FullName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@Cli_FacturaMail", _billAds.Email, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@Cli_FacturaMail", _billAds.Email, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cli_direc", _billAds.Street.ToUpper(), (DbType?)SqlDbType.VarChar);  // varchar(80) 
-                paramsInsert.Add("@cli_colonia", _billAds.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);  // varchar(50) 
-                paramsInsert.Add("@cli_cp", _billAds.ZipCode, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@cli_direc", _billAds.Street.ToUpper(), base.ToDbType(SqlDbType.VarChar));  // varchar(80) 
+                paramsInsert.Add("@cli_colonia", _billAds.Colony.ToUpper(), base.ToDbType(SqlDbType.VarChar));  // varchar(50) 
+                paramsInsert.Add("@cli_cp", _billAds.ZipCode, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@cveUsoCFDI", _billAds.CfdiUsageKey, (DbType?)SqlDbType.VarChar);  // varchar(3) 
-                paramsInsert.Add("@cveFormaPago", _billAds.PaymentTypeKey, (DbType?)SqlDbType.VarChar);  // varchar(2) 
-                paramsInsert.Add("@cveMetodoPago", _billAds.PaymentMethodKey, (DbType?)SqlDbType.VarChar);  // varchar(3) 
-                paramsInsert.Add("@CveRegimenFiscal", _billAds.TaxRegime, (DbType?)SqlDbType.VarChar);  // varchar(3) 
+                paramsInsert.Add("@cveUsoCFDI", _billAds.CfdiUsageKey, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
+                paramsInsert.Add("@cveFormaPago", _billAds.PaymentTypeKey, base.ToDbType(SqlDbType.VarChar));  // varchar(2) 
+                paramsInsert.Add("@cveMetodoPago", _billAds.PaymentMethodKey, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
+                paramsInsert.Add("@CveRegimenFiscal", _billAds.TaxRegime, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
 
                 #endregion
 
@@ -543,7 +550,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this._UpdateCustomerAllAccessAsync(customer);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -559,7 +567,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         }
         private
             async Task<Customer> _UpdateCustomerAllAccessAsync(Customer customer)
-        // Privado  mientras se define SI ALGUIEN lo van a requerir 
+        // Privado  mientras se define SI ALGUIEN lo va a requerir 
         {
             return
                 //await this._UpdateCustomerAllAccessAsync_ConSP(customer); 
@@ -673,43 +681,45 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                 #region " Parámetros con Valores  para el Query " 
 
-                //paramsUpdate.Add("@cli_clave", newCustomerKey, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@cli_claveExterna", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+
+                //paramsUpdate.Add("@cli_clave", newCustomerKey, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@cli_claveExterna", customer.IdCustomer, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@cli_cvematriz", customer.ParentCustomerKey, base.ToDbType(SqlDbType.VarChar));
 
                 // Valores originalmente calculados por el  SqlStoredProcedure
                 //  ( Estos Valores únicamente se podrán actualizar internamente, NO desde la WEB )
-                paramsUpdate.Add("@cli_dias", diasCredito, DbType.Int16); // SqlDbType.SmallInt
-                paramsUpdate.Add("@dcartera", diasCartera, DbType.Int16); // SqlDbType.SmallInt
-                paramsUpdate.Add("@cli_cvecred", cveCredito, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@tasa", tasaIVA, DbType.Decimal); // SqlDbType.Decimal
-                //paramsUpdate.Add("@cli_ncar", claveZona, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@cli_agente", agenteWeb, (DbType?)SqlDbType.VarChar);
+                paramsUpdate.Add("@cli_dias", diasCredito, base.ToDbType(SqlDbType.SmallInt)); // SqlDbType.SmallInt
+                paramsUpdate.Add("@dcartera", diasCartera, base.ToDbType(SqlDbType.SmallInt)); // SqlDbType.SmallInt
+                paramsUpdate.Add("@cli_cvecred", cveCredito, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@tasa", tasaIVA, base.ToDbType(SqlDbType.Decimal)); // SqlDbType.Decimal
+                //paramsUpdate.Add("@cli_ncar", claveZona, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@cli_agente", agenteWeb, base.ToDbType(SqlDbType.VarChar));
 
                 // Valores Hard-Codeados
-                //paramsUpdate.Add("@cli_autcredito", "S", (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@cli_montoautorizado", 0, DbType.Decimal);
-                //paramsUpdate.Add("@cli_pob", "0", (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@creditoWeb", "", (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@cli_id_contacto", 1, DbType.Int32); // SqlDbType.Int
+                //paramsUpdate.Add("@cli_autcredito", "S", base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@cli_montoautorizado", 0, base.ToDbType(SqlDbType.Decimal));
+                //paramsUpdate.Add("@cli_pob", "0", base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@creditoWeb", "", base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@cli_id_contacto", 1, base.ToDbType(SqlDbType.Int)); // SqlDbType.Int
 
                 // Email
-                paramsUpdate.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@correo_notificaciones", customer.Email, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@cli_REPmail", customer.Email, (DbType?)SqlDbType.VarChar);
+                paramsUpdate.Add("@cli_email", customer.Email, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@correo_notificaciones", customer.Email, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@cli_REPmail", customer.Email, base.ToDbType(SqlDbType.VarChar));
 
                 // Se agregó una propiedad  BillingAddress.Email  que apunta a ésta columna 
                 // para que forme parte de los datos de Facturación, y ya NO de los datos básicos.
-                ////paramsUpdate.Add("@Cli_FacturaMail", customer.Email, (DbType?)SqlDbType.VarChar);
+                ////paramsUpdate.Add("@Cli_FacturaMail", customer.Email, base.ToDbType(SqlDbType.VarChar));
 
-                //paramsUpdate.Add("@cli_compra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);  
-                //paramsUpdate.Add("@Cli_CompraApellido", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar); 
-                paramsUpdate.Add("@cli_giro", customer.KeyTurn, DbType.Byte);
-                //paramsUpdate.Add("@Cli_Medio", customer.MeansOfContact, DbType.Byte);
+                //paramsUpdate.Add("@cli_compra", customer.ShoppingName.ToUpper(), base.ToDbType(SqlDbType.VarChar));  
+                //paramsUpdate.Add("@Cli_CompraApellido", customer.ShoppingFirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar)); 
+                paramsUpdate.Add("@cli_giro", customer.KeyTurn, base.ToDbType(SqlDbType.TinyInt));
+                //paramsUpdate.Add("@Cli_Medio", customer.MeansOfContact, base.ToDbType(SqlDbType.TinyInt));
 
-                //paramsUpdate.Add("@cli_tel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@cli_tel1", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                //paramsUpdate.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
+                //paramsUpdate.Add("@cli_tel", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@cli_tel1", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                //paramsUpdate.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
 
                 #endregion
 
@@ -907,7 +917,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                     // Se requiere Actualizar el valor de .ParentCustomerKey
                     // cuando se registran los datos de la primer .BillingAddress
-                    paramsUpdate.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
+                    paramsUpdate.Add("@cli_cvematriz", customer.ParentCustomerKey, base.ToDbType(SqlDbType.VarChar));
                 }
 
                 #region " Parámetros con Valores de  BillingAddress  para el Query " 
@@ -915,24 +925,27 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 BillingAddress _billAds =
                     customer.BillingAddress;
 
-                //paramsInsert.Add("@idBillingAddress", _billAds.IdBillingAddress, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@Cli_FacturaMail", _billAds.Email, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@cli_rfc", _billAds.Rfc, (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
 
-                paramsUpdate.Add("@cli_nom", _billAds.Name.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nom 
-                paramsUpdate.Add("@cli_apat", _billAds.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@cli_amat", _billAds.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@cli_nombre", _billAds.FullName.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nomComercial, cli_nombre
-                paramsUpdate.Add("@cli_nomComercial", _billAds.FullName.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nomComercial, cli_nombre
+                //paramsInsert.Add("@idBillingAddress", _billAds.IdBillingAddress, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@Cli_FacturaMail", _billAds.Email, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@cli_rfc", _billAds.Rfc, base.ToDbType(SqlDbType.VarChar));
 
-                paramsUpdate.Add("@cli_direc", _billAds.Street.ToUpper(), (DbType?)SqlDbType.VarChar);  // varchar(80) 
-                paramsUpdate.Add("@cli_colonia", _billAds.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);  // varchar(50) 
-                paramsUpdate.Add("@cli_cp", _billAds.ZipCode, (DbType?)SqlDbType.VarChar);
+                paramsUpdate.Add("@cli_nom", _billAds.Name.ToUpper(), base.ToDbType(SqlDbType.VarChar)); 
+                paramsUpdate.Add("@cli_apat", _billAds.FirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@cli_amat", _billAds.LastName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
 
-                //paramsUpdate.Add("@cveUsoCFDI", _billAds.CfdiUsageKey, (DbType?)SqlDbType.VarChar);  // varchar(3) 
-                //paramsUpdate.Add("@cveFormaPago", _billAds.PaymentTypeKey, (DbType?)SqlDbType.VarChar);  // varchar(2) 
-                //paramsUpdate.Add("@cveMetodoPago", _billAds.PaymentMethodKey, (DbType?)SqlDbType.VarChar);  // varchar(3) 
-                //paramsUpdate.Add("@CveRegimenFiscal", _billAds.TaxRegime, (DbType?)SqlDbType.VarChar);  // varchar(3) 
+                paramsUpdate.Add("@cli_nombre", _billAds.FullName.ToUpper(), base.ToDbType(SqlDbType.VarChar)); 
+                paramsUpdate.Add("@cli_nomComercial", _billAds.FullName.ToUpper(), base.ToDbType(SqlDbType.VarChar)); 
+
+                paramsUpdate.Add("@cli_direc", _billAds.Street.ToUpper(), base.ToDbType(SqlDbType.VarChar));  // varchar(80) 
+                paramsUpdate.Add("@cli_colonia", _billAds.Colony.ToUpper(), base.ToDbType(SqlDbType.VarChar));  // varchar(50) 
+                paramsUpdate.Add("@cli_cp", _billAds.ZipCode, base.ToDbType(SqlDbType.VarChar));
+
+                //paramsUpdate.Add("@cveUsoCFDI", _billAds.CfdiUsageKey, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
+                //paramsUpdate.Add("@cveFormaPago", _billAds.PaymentTypeKey, base.ToDbType(SqlDbType.VarChar));  // varchar(2) 
+                //paramsUpdate.Add("@cveMetodoPago", _billAds.PaymentMethodKey, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
+                //paramsUpdate.Add("@CveRegimenFiscal", _billAds.TaxRegime, base.ToDbType(SqlDbType.VarChar));  // varchar(3) 
 
                 #endregion
 
@@ -965,7 +978,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this._GetCustomerAsync(customer.CustomerKey, customer.IdCustomer);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -1526,7 +1540,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this._InsertShippingAddressAsync(shippingAddress);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -1562,9 +1577,11 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                 DynamicParameters paramsInsert = new DynamicParameters();
 
-                paramsInsert.Add("@Cliente", shippingAddress.CustomerKey.Trim(), (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@IDSuc", shippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar);//id que genera la pagina
-                paramsInsert.Add("@NombreSuc", shippingAddress.Alias, (DbType?)SqlDbType.VarChar);//nombre de la sucursal
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+
+                paramsInsert.Add("@Cliente", shippingAddress.CustomerKey.Trim(), base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@IDSuc", shippingAddress.ShippingAddressId, base.ToDbType(SqlDbType.VarChar));//id que genera la pagina
+                paramsInsert.Add("@NombreSuc", shippingAddress.Alias, base.ToDbType(SqlDbType.VarChar));//nombre de la sucursal
 
                 if (shippingAddress.Street == null) shippingAddress.Street = "";
                 if (shippingAddress.Colony == null) shippingAddress.Colony = "";
@@ -1577,13 +1594,13 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 if (shippingAddress.FullAddress == null)
                     shippingAddress.FullAddress = "";
                 if (_FullAddress.Trim() == "") _FullAddress += shippingAddress.FullAddress.Trim();
-                shippingAddress.FullAddress = _FullAddress;
+                shippingAddress.FullAddress = _FullAddress.Trim();
 
-                paramsInsert.Add("@Domicilio", shippingAddress.FullAddress, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@Domicilio", shippingAddress.FullAddress, base.ToDbType(SqlDbType.VarChar));
 
-                paramsInsert.Add("@tel1", shippingAddress.Phone, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@CP", shippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-                paramsInsert.Add("@Ciudad", shippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+                paramsInsert.Add("@tel1", shippingAddress.Phone, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@CP", shippingAddress.ZipCode, base.ToDbType(SqlDbType.VarChar));
+                paramsInsert.Add("@Ciudad", shippingAddress.CityKey, base.ToDbType(SqlDbType.VarChar));
 
                 /* 
                 CREATE TABLE [dbo].[Sucs_Domicilios](
@@ -1622,7 +1639,8 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this.GetShippingAddressAsync(shippingAddress.ShippingAddressId);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -1668,9 +1686,11 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
                 DynamicParameters paramsUpdate = new DynamicParameters();
 
-                //paramsUpdate.Add("@IDSuc", shippingAddress.ShippingAddressId, (DbType?)SqlDbType.VarChar); 
-                paramsUpdate.Add("@Cliente", shippingAddress.CustomerKey.Trim(), (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@NombreSuc", shippingAddress.Alias, (DbType?)SqlDbType.VarChar);//nombre de la sucursal
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+
+                //paramsUpdate.Add("@IDSuc", shippingAddress.ShippingAddressId, base.ToDbType(SqlDbType.VarChar)); 
+                paramsUpdate.Add("@Cliente", shippingAddress.CustomerKey.Trim(), base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@NombreSuc", shippingAddress.Alias, base.ToDbType(SqlDbType.VarChar));//nombre de la sucursal
 
                 if (shippingAddress.Street == null) shippingAddress.Street = "";
                 if (shippingAddress.Colony == null) shippingAddress.Colony = "";
@@ -1683,13 +1703,13 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 if (shippingAddress.FullAddress == null)
                     shippingAddress.FullAddress = "";
                 if (_FullAddress.Trim() == "") _FullAddress += shippingAddress.FullAddress.Trim();
-                shippingAddress.FullAddress = _FullAddress;
+                shippingAddress.FullAddress = _FullAddress.Trim();
 
-                paramsUpdate.Add("@Domicilio", shippingAddress.FullAddress, (DbType?)SqlDbType.VarChar);
+                paramsUpdate.Add("@Domicilio", shippingAddress.FullAddress, base.ToDbType(SqlDbType.VarChar));
 
-                paramsUpdate.Add("@tel1", shippingAddress.Phone, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@CP", shippingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-                paramsUpdate.Add("@Ciudad", shippingAddress.CityKey, (DbType?)SqlDbType.VarChar);
+                paramsUpdate.Add("@tel1", shippingAddress.Phone, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@CP", shippingAddress.ZipCode, base.ToDbType(SqlDbType.VarChar));
+                paramsUpdate.Add("@Ciudad", shippingAddress.CityKey, base.ToDbType(SqlDbType.VarChar));
 
 
                 List<string> _ParameterUpdateExpressions =
@@ -1707,10 +1727,11 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     await this._EjecutorSql.ExecuteAsync(strQueryUpdateParametrizado, paramsUpdate, commandType: CommandType.Text);
 
                 ShippingAddress updatedShippingAddress = 
-                    await this.GetShippingAddressAsync(shippingAddress.ShippingAddressId); 
+                    await this.GetShippingAddressAsync(shippingAddress.ShippingAddressId);
 
 
-                if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
+                if (dbTransaction != null) { await dbTransaction.RollbackAsync(); }
+                //if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
                 if (dbConn != null) { await dbConn.CloseAsync(); }
 
                 return
@@ -1817,51 +1838,53 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             {
                 DynamicParameters parameters = new DynamicParameters();
 
+                // (DbType?) SqlDbType.VarChar  base.ToDbType(SqlDbType.VarChar)
+
                 #region " Parámetros del StoredProcedure  ( valores de Datos Básicos ) " 
 
-                parameters.Add("@cve_cliente", customer.IdCustomer, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, (DbType?)SqlDbType.VarChar);
+                parameters.Add("@cve_cliente", customer.IdCustomer, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cli_cvematriz", customer.ParentCustomerKey, base.ToDbType(SqlDbType.VarChar));
 
-                parameters.Add("@nombreCompra", customer.ShoppingName.ToUpper(), (DbType?)SqlDbType.VarChar);  // cli_compra
-                parameters.Add("@apellidoCompra", customer.ShoppingFirstName.ToUpper(), (DbType?)SqlDbType.VarChar); // Cli_CompraApellido
-                parameters.Add("@telefono", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@pais", "Mexico", (DbType?)SqlDbType.VarChar);
+                parameters.Add("@nombreCompra", customer.ShoppingName.ToUpper(), base.ToDbType(SqlDbType.VarChar));  // cli_compra
+                parameters.Add("@apellidoCompra", customer.ShoppingFirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar)); // Cli_CompraApellido
+                parameters.Add("@telefono", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@Cli_ComprasCel", customer.ShoppingPhoneNumber, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@pais", "Mexico", base.ToDbType(SqlDbType.VarChar));
 
-                parameters.Add("@cli_email", customer.Email, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@giro_cve", customer.KeyTurn, DbType.Byte);
-                parameters.Add("@cli_medio", customer.MeansOfContact, (DbType?)SqlDbType.Int); //TODO: Cambiar a  DbType.Byte 
-                parameters.Add("@credito", customer.Credit, (DbType?)SqlDbType.VarChar); //TODO: el SP 'RoltecAddCustomer' recibe Este parámetro pero no lo utiliza para nada 
-                parameters.Add("@credito_dias", customer.CreditDays, (DbType?)SqlDbType.Int); //TODO: Cambiar a  DbType.Int16 
+                parameters.Add("@cli_email", customer.Email, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@giro_cve", customer.KeyTurn, base.ToDbType(SqlDbType.TinyInt));
+                parameters.Add("@cli_medio", customer.MeansOfContact, base.ToDbType(SqlDbType.Int)); //TODO: Cambiar a  DbType.Byte 
+                parameters.Add("@credito", customer.Credit, base.ToDbType(SqlDbType.VarChar)); //TODO: el SP 'RoltecAddCustomer' recibe Este parámetro pero no lo utiliza para nada 
+                parameters.Add("@credito_dias", customer.CreditDays, base.ToDbType(SqlDbType.Int)); //TODO: Cambiar a  DbType.Int16 
 
                 #endregion 
 
                 #region " Parámetros del StoredProcedure  ( valores de BillingAddress ) " 
 
-                parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, (DbType?)SqlDbType.VarChar);
-                //parameters.Add("@Cli_FacturaMail", customer.BillingAddress.Email, (DbType?)SqlDbType.VarChar); 
-                parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nom 
-                parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cli_nombre", customer.BillingAddress.FullName.ToUpper(), (DbType?)SqlDbType.VarChar); // cli_nomComercial, cli_nombre
+                parameters.Add("@billingAddressId", customer.BillingAddress.IdBillingAddress, base.ToDbType(SqlDbType.VarChar));
+                //parameters.Add("@Cli_FacturaMail", customer.BillingAddress.Email, base.ToDbType(SqlDbType.VarChar)); 
+                parameters.Add("@cli_nom", customer.BillingAddress.Name.ToUpper(), base.ToDbType(SqlDbType.VarChar)); // cli_nom 
+                parameters.Add("@cli_apat", customer.BillingAddress.FirstName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cli_amat", customer.BillingAddress.LastName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cli_nombre", customer.BillingAddress.FullName.ToUpper(), base.ToDbType(SqlDbType.VarChar)); // cli_nomComercial, cli_nombre
 
-                parameters.Add("@rfc", customer.BillingAddress.Rfc, (DbType?)SqlDbType.VarChar);
+                parameters.Add("@rfc", customer.BillingAddress.Rfc, base.ToDbType(SqlDbType.VarChar));
                 string strDenominacionSocial =
                     (customer.BillingAddress.Rfc.Length == 13)
                     ? customer.BillingAddress.FullName.ToUpper()
                     : customer.BillingAddress.CompanyName
                     ;
-                parameters.Add("@cli_DenominacionSocial", strDenominacionSocial, (DbType?)SqlDbType.VarChar);
+                parameters.Add("@cli_DenominacionSocial", strDenominacionSocial, base.ToDbType(SqlDbType.VarChar));
 
-                parameters.Add("@CveRegimenFiscal", customer.BillingAddress.TaxRegime, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cve_metodo_pago", customer.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cve_forma_pago", customer.BillingAddress.PaymentTypeKey, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@cve_uso_cfdi", customer.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@codigo_postal", customer.BillingAddress.ZipCode, (DbType?)SqlDbType.VarChar);
-                parameters.Add("@ciudad", customer.BillingAddress.City, (DbType?)SqlDbType.VarChar); //TODO: el SP 'RoltecAddCustomer' recibe Este parámetro pero no lo utiliza para nada 
-                parameters.Add("@estado", customer.BillingAddress.State, (DbType?)SqlDbType.Int);
-                parameters.Add("@calle", customer.BillingAddress.Street.ToUpper(), (DbType?)SqlDbType.VarChar);
-                parameters.Add("@colonia", customer.BillingAddress.Colony.ToUpper(), (DbType?)SqlDbType.VarChar);
+                parameters.Add("@CveRegimenFiscal", customer.BillingAddress.TaxRegime, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cve_metodo_pago", customer.BillingAddress.PaymentMethodKey, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cve_forma_pago", customer.BillingAddress.PaymentTypeKey, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@cve_uso_cfdi", customer.BillingAddress.CfdiUsageKey, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@codigo_postal", customer.BillingAddress.ZipCode, base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@ciudad", customer.BillingAddress.City, base.ToDbType(SqlDbType.VarChar)); //TODO: el SP 'RoltecAddCustomer' recibe Este parámetro pero no lo utiliza para nada 
+                parameters.Add("@estado", customer.BillingAddress.State, base.ToDbType(SqlDbType.Int));
+                parameters.Add("@calle", customer.BillingAddress.Street.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+                parameters.Add("@colonia", customer.BillingAddress.Colony.ToUpper(), base.ToDbType(SqlDbType.VarChar));
 
                 #endregion
 
@@ -1888,6 +1911,10 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 throw new Exception(ex.Message);
             }
         }
+
+        #region " Métodos Comentados que YA NO tenían referencias "
+
+        /* 
 
         /// <summary>
         /// Obtener un cliente a traves de la clave externa
@@ -1942,7 +1969,10 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                 customerResponse =
                     await this._EjecutorSql.QuerySingleOrDefaultAsync<CustomerResponse>(strQueryAutoEnsamblado);
 
-                /* 
+
+                #region " Este Query está correcto pero YA NO SE USA, porque se sustituyó por una versión Auto-Mappeada "
+
+                // Este Query está correcto pero YA NO SE USA, porque se sustituyó por una versión Auto-Mappeada 
                 string queryString = ""
                     + " select "
                     + " cli_clave as [CustomerKey], "
@@ -1953,8 +1983,9 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
                     + " from inctclie (nolock) "
                     + " where cli_claveExterna = '" + idCustomer.Trim() + "' "
                     ;
-                customerResponse = await sqlConnection.QueryFirstOrDefaultAsync<CustomerResponse>(queryString);
-                // */
+                //customerResponse = await sqlConnection.QueryFirstOrDefaultAsync<CustomerResponse>(queryString);
+
+                #endregion 
 
 
                 if (dbTransaction != null) { await dbTransaction.CommitAsync(); }
@@ -2204,11 +2235,6 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
 
         }
 
-        /// <summary>
-        /// Validar si existe el cliente con el customerkey
-        /// </summary>
-        /// <param name="customerKey"></param>
-        /// <returns></returns>
         private async Task<bool> GetCustomerByCustumerKey(string customerKey) // Ya NO tiene referencias. 
         {
             string queryString = ""
@@ -2251,6 +2277,10 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
             return false;
 
         }
+
+        // */ 
+
+        #endregion 
 
         //
     }
