@@ -37,7 +37,7 @@ namespace ApiGoldenstarServices.Data.DataAccess.Roltec
         }
 
         // Get connection to Database
-        public SqlConnection DbConnection()
+        private SqlConnection DbConnection()
         {
             Exception ex =
                 new Exception(

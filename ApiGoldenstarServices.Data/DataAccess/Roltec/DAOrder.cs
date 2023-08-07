@@ -1,4 +1,5 @@
-﻿using ApiGoldenstarServices.Models.Goldenstar;
+﻿
+using ApiGoldenstarServices.Models.Goldenstar;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using System;
@@ -14,50 +15,38 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
     /// <summary>
     /// Acceso a datos para agregar, actualizar las ordenes provenientes de la pagina de roltec.mx
     /// </summary>
-    public class DAOrder // : IOrder
+    public class DAOrder : DABase  // : IOrder 
     {
-        private SqlConfiguration _SqlConfiguration;
-        private EjecutorSql _EjecutorSql;
+        //private SqlConfiguration _SqlConfiguration;
+        //private EjecutorSql _EjecutorSql;
 
-        public DAOrder(SqlConfiguration sqlConfiguration) 
+        public DAOrder(SqlConfiguration sqlConfiguration) : base(sqlConfiguration)
         {
-            if (sqlConfiguration == null)
-            {
-                throw
-                    new ArgumentNullException(
-                        nameof(sqlConfiguration),
-                        "NO se puede obtener ConnectionString de un objeto Nulo de tipo 'SqlConfiguration'."
-                        );
-            }
-
-            this._EjecutorSql = new EjecutorSql(sqlConfiguration.ConnectionString);
-            this._SqlConfiguration = sqlConfiguration;
+            //
         }
-        public DAOrder(SqlConnection sqlConnection) 
+        public DAOrder(SqlConnection sqlConnection) : base(sqlConnection)
         {
-            if (sqlConnection == null) 
-            {
-                throw
-                    new ArgumentNullException(
-                        nameof(sqlConnection),
-                        "Se requiere una conexión de Base de Datos para instanciar un objeto de Acceso a Datos de Órdenes."
-                        );
-            }
-
-            this._EjecutorSql = new EjecutorSql(sqlConnection);
-            this._SqlConfiguration = new SqlConfiguration(sqlConnection.ConnectionString); 
+            //
         }
+
 
         // Get connection to Database
         public SqlConnection DbConnection()
         //TODO: Revisar cada vez que se pueda, y Cuando esta función no tenga ninguna referencia implementada, borrarla
         //TODO: Antes de borrar esta función, Insertar la misma Excepción y comentarios en la función de las demás Clases 
         {
-            Exception ex = 
+            Exception ex =
+                new Exception(
+                    "Los Métodos que implementan "
+                    + this.GetType().Name + ".DbConnection(),  ya NO deben ni requieren usarse."
+                );
+            ex = 
                 new Exception("Falta Sustituir la implementación de  DAOrder.DbConnection(),  por las funciones de 'EjecutorSql'.");
             //if (ex != null) throw ex;
 
-            return new SqlConnection(this._SqlConfiguration.ConnectionString);
+            //return new SqlConnection(this._SqlConfiguration.ConnectionString);
+            return 
+                base.DbConnectionBase();
         }
 
 
@@ -351,9 +340,9 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                     + "'" + order.CustomerId.Trim() + "', "
                     + "'" + order.CustomerName.Trim() + "', "
                     + "'" + order.Cupon.Trim() + "', "
-                    + "'" + order.Discount.Trim() + "', "
-                    + "'" + order.Subtotal.Trim() + "', "
-                    + "'" + order.Vat.Trim() + "', "
+                    + "'" + order.Discount.ToString() + "', "
+                    + "'" + order.Subtotal.ToString() + "', "
+                    + "'" + order.Vat.ToString() + "', "
                     + "'" + order.VatRate.Trim() + "', "
                     + "'" + order.PaymentMethod.Trim() + "', "
                     + "'" + order.Notes.Trim() + "' "
@@ -365,23 +354,26 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                 #region " Query parametrizado ( PARA Insert ) "
 
                 DynamicParameters dynParameters = new DynamicParameters();
-                dynParameters.Add("@ord_magento", newPrimaryKey, (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@ord_clie", order.CustomerId.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@cli_nombre", order.CustomerName.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@ord_cupon", order.Cupon.Trim(), (DbType?)SqlDbType.VarChar);
 
-                //dynParameters.Add("@descuentoimporte", order.Discount.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@descuentoimporte", "0" + order.Discount.Trim(), (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  // base.ToDbType(SqlDbType.VarChar)
 
-                //dynParameters.Add("@subtotal", order.Subtotal.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@subtotal", "0" + order.Subtotal.Trim(), (DbType?)SqlDbType.VarChar);
+                dynParameters.Add("@ord_magento", newPrimaryKey, base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@ord_clie", order.CustomerId.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@cli_nombre", order.CustomerName.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@ord_cupon", order.Cupon.Trim(), base.ToDbType(SqlDbType.VarChar));
 
-                //dynParameters.Add("@iva", order.Vat.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@iva", "0" + order.Vat.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@tasa_iva", order.VatRate.Trim(), (DbType?)SqlDbType.VarChar);
+                dynParameters.Add("@descuentoimporte", order.Discount, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@descuentoimporte", "0" + order.Discount.Trim(), base.ToDbType(SqlDbType.VarChar));
 
-                dynParameters.Add("@metodo_pago_magento", order.PaymentMethod.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@notas", order.Notes.Trim(), (DbType?)SqlDbType.VarChar);
+                dynParameters.Add("@subtotal", order.Subtotal, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@subtotal", "0" + order.Subtotal.Trim(), base.ToDbType(SqlDbType.VarChar));
+
+                dynParameters.Add("@iva", order.Vat, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@iva", "0" + order.Vat.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@tasa_iva", order.VatRate.Trim(), base.ToDbType(SqlDbType.VarChar));
+
+                dynParameters.Add("@metodo_pago_magento", order.PaymentMethod.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@notas", order.Notes.Trim(), base.ToDbType(SqlDbType.VarChar));
                 /* 
 	            [ord_magento] [varchar](10) NOT NULL,
 	            [ord_fecha] [datetime] NULL,
@@ -477,23 +469,26 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
                 #region " Query parametrizado ( PARA Update ) "
 
                 DynamicParameters dynParameters = new DynamicParameters();
-                //dynParameters.Add("@ord_magento", order.IdOrder.Trim(), (DbType?)SqlDbType.VarChar);  // La PrimaryKey NO debe modificarse
-                dynParameters.Add("@ord_clie", order.CustomerId.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@cli_nombre", order.CustomerName.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@ord_cupon", order.Cupon.Trim(), (DbType?)SqlDbType.VarChar);
 
-                //dynParameters.Add("@descuentoimporte", order.Discount.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@descuentoimporte", "0" + order.Discount.Trim(), (DbType?)SqlDbType.VarChar);
+                // (DbType?) SqlDbType.VarChar  // base.ToDbType(SqlDbType.VarChar)
 
-                //dynParameters.Add("@subtotal", order.Subtotal.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@subtotal", "0" + order.Subtotal.Trim(), (DbType?)SqlDbType.VarChar);
+                //dynParameters.Add("@ord_magento", order.IdOrder.Trim(), base.ToDbType(SqlDbType.VarChar));  // La PrimaryKey NO debe modificarse
+                dynParameters.Add("@ord_clie", order.CustomerId.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@cli_nombre", order.CustomerName.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@ord_cupon", order.Cupon.Trim(), base.ToDbType(SqlDbType.VarChar));
 
-                //dynParameters.Add("@iva", order.Vat.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@iva", "0" + order.Vat.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@tasa_iva", order.VatRate.Trim(), (DbType?)SqlDbType.VarChar);
+                dynParameters.Add("@descuentoimporte", order.Discount, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@descuentoimporte", "0" + order.Discount.Trim(), base.ToDbType(SqlDbType.VarChar));
 
-                dynParameters.Add("@metodo_pago_magento", order.PaymentMethod.Trim(), (DbType?)SqlDbType.VarChar);
-                dynParameters.Add("@notas", order.Notes.Trim(), (DbType?)SqlDbType.VarChar);
+                dynParameters.Add("@subtotal", order.Subtotal, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@subtotal", "0" + order.Subtotal.Trim(), base.ToDbType(SqlDbType.VarChar));
+
+                dynParameters.Add("@iva", order.Vat, base.ToDbType(SqlDbType.Decimal));
+                //dynParameters.Add("@iva", "0" + order.Vat.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@tasa_iva", order.VatRate.Trim(), base.ToDbType(SqlDbType.VarChar));
+
+                dynParameters.Add("@metodo_pago_magento", order.PaymentMethod.Trim(), base.ToDbType(SqlDbType.VarChar));
+                dynParameters.Add("@notas", order.Notes.Trim(), base.ToDbType(SqlDbType.VarChar));
 
 
                 List<string> _ParameterUpdateExpressions =
@@ -623,34 +618,39 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
         {
             var db = DbConnection();
             await db.OpenAsync();
+
+            #region " Add pare(A)meters to Store(D)Procedure " 
+
             string CreatedAt = DateTime.Now.ToString("yyyyMMdd");
-            // Add paremeters to StoreProcedure
 
             DynamicParameters parameters = new DynamicParameters();
-            //20
-            parameters.Add("@id_ord", order.IdOrder.ToUpper(), (DbType?)SqlDbType.VarChar);
-            parameters.Add("@ord_fecha", CreatedAt, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@ord_clie", order.CustomerId, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cli_nombre", order.CustomerName.ToUpper(), (DbType?)SqlDbType.VarChar);
-            parameters.Add("@paqueteria", "", (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cve_forma_pago", order.BillingAddress.PaymentTypeKey, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@no_parcialidades", order.IdOrder.ToUpper(), (DbType?)SqlDbType.VarChar);
+
+            // (DbType?) SqlDbType.VarChar  // base.ToDbType(SqlDbType.VarChar)
+
+            parameters.Add("@id_ord", order.IdOrder.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@ord_fecha", CreatedAt, base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@ord_clie", order.CustomerId, base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@cli_nombre", order.CustomerName.ToUpper(), base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@paqueteria", "", base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@cve_forma_pago", order.BillingAddress.PaymentTypeKey, base.ToDbType(SqlDbType.VarChar));
+            //parameters.Add("@no_parcialidades", order.IdOrder.ToUpper(), base.ToDbType(SqlDbType.VarChar));
 
             parameters.Add("@dias_credito", order.BillingAddress.CreditDays, DbType.Int16);
 
-            parameters.Add("@ord_cupon", order.Cupon, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@descuentoimporte", order.Discount, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@subtotal", order.Subtotal, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@factura", order.ta, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@cve_uso_cfdi", order.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@email_facturacion", order.Ema, (DbType?)SqlDbType.VarChar);//se puede obtener del cliente
-            parameters.Add("@iva", order.Vat, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@tasa_iva", order.VatRate, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@cve_metodo_pago", , (DbType?)SqlDbType.VarChar);
-            parameters.Add("@metodo_pago", order.PaymentMethod, (DbType?)SqlDbType.VarChar);
-            //parameters.Add("@orden_compra_credito", order.IdOrder.ToUpper(), (DbType?)SqlDbType.VarChar);//como debe aplicar?
-            parameters.Add("@notas", order.Notes, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@ord_cupon", order.Cupon, base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@descuentoimporte", order.Discount, base.ToDbType(SqlDbType.Decimal));
+            parameters.Add("@subtotal", order.Subtotal, base.ToDbType(SqlDbType.Decimal));
+            //parameters.Add("@factura", order.ta, base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@cve_uso_cfdi", order.BillingAddress.CfdiUsageKey, base.ToDbType(SqlDbType.VarChar));
+            //parameters.Add("@email_facturacion", order.Ema, base.ToDbType(SqlDbType.VarChar));//se puede obtener del cliente
+            parameters.Add("@iva", order.Vat, base.ToDbType(SqlDbType.Decimal));
+            parameters.Add("@tasa_iva", order.VatRate, base.ToDbType(SqlDbType.VarChar));
+            //parameters.Add("@cve_metodo_pago", , base.ToDbType(SqlDbType.VarChar));
+            parameters.Add("@metodo_pago", order.PaymentMethod, base.ToDbType(SqlDbType.VarChar));
+            //parameters.Add("@orden_compra_credito", order.IdOrder.ToUpper(), base.ToDbType(SqlDbType.VarChar));//como debe aplicar?
+            parameters.Add("@notas", order.Notes, base.ToDbType(SqlDbType.VarChar));
 
+            #endregion 
 
             try
             {
@@ -843,12 +843,12 @@ namespace ApiGoldenstarServices.Data.DataAccess.Goldenstar
             parameters.Add("@dias_credito", order.BillingAddress.CreditDays, DbType.Int16);
 
             parameters.Add("@ord_cupon", order.Cupon, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@descuentoimporte", order.Discount, (DbType?)SqlDbType.VarChar);
-            parameters.Add("@subtotal", order.Subtotal, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@descuentoimporte", order.Discount, base.ToDbType(SqlDbType.Decimal));
+            parameters.Add("@subtotal", order.Subtotal, base.ToDbType(SqlDbType.Decimal));
             //parameters.Add("@factura", order., (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_uso_cfdi", order.BillingAddress.CfdiUsageKey, (DbType?)SqlDbType.VarChar);
             //parameters.Add("@email_facturacion", order., (DbType?)SqlDbType.VarChar);
-            parameters.Add("@iva", order.Vat, (DbType?)SqlDbType.VarChar);
+            parameters.Add("@iva", order.Vat, base.ToDbType(SqlDbType.Decimal));
             parameters.Add("@tasa_iva", order.VatRate, (DbType?)SqlDbType.VarChar);
             parameters.Add("@cve_metodo_pago", order.BillingAddress.PaymentMethodKey, (DbType?)SqlDbType.VarChar);
             parameters.Add("@metodo_pago_magento", order.PaymentMethod, (DbType?)SqlDbType.VarChar);
